@@ -1,7 +1,6 @@
 # ILLUMINATION SYSTEM FIRMWARE
 Software/Illumination_FW/build/
 Software/Illumination_FW/.vscode/c_cpp_properties.json
-Software/Illumination_FW/sdkconfig
 Software/Illumination_FW/sdkconfig.old
 
 # MacOs specific files
