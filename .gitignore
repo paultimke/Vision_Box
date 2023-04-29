@@ -1,7 +1,10 @@
 # ILLUMINATION SYSTEM FIRMWARE
 Software/Illumination_FW/build/
 Software/Illumination_FW/.vscode/c_cpp_properties.json
+Software/Illumintation_FW/sdkconfig
 Software/Illumination_FW/sdkconfig.old
+Software/Illumination_FW/.devcontainer
+Software/Illumination_FW/dependencies.lock
 
 # MacOs specific files
 *.DS_Store
