@@ -120,6 +120,11 @@ class ColorImage:
         return (max(pixel_rgb) - min(pixel_rgb)) < max_deviation
 
     def __weightedIoU(self, hist1: Dict[str, Tuple], hist2: Dict[str, Tuple]) -> float:
+        """ Computes a weighted Intersection over Union ratio between two sets of \
+            colors, where the Intersection is the sum of the coefficients for each\
+            such that the color exists in both sets and the Union is the sum of the
+            coefficients of the Union of both sets
+        """
         normHist1 = {k: v/max(hist1.values()) for (k,v) in hist1.items() if v != 0}
         normHist2 = {k: v/max(hist2.values()) for (k,v) in hist2.items() if v != 0}
 
