@@ -40,7 +40,7 @@ def visualize(img, title:str, figure:int):
     plt.figure(figure)
     plt.title(title) 
     plt.imshow(img, cmap="gray")
-    plt.show()
+    
 
 
 def template_init(template_path):
@@ -118,7 +118,7 @@ def findObjects(foundList, template, display_image, found_treshold, acceptance_d
     (tH, tW) = template.shape[:2]
 
     # Variables init
-    startX_T = startY_T = endX_T = endY_T = detected_objs = rejected_objects = 0
+    startX_T = startY_T = detected_objs = rejected_objects = 0
     detected_list = []
     rejected_list = []
     detected_temp = [0,0,0,0,0]
@@ -130,7 +130,7 @@ def findObjects(foundList, template, display_image, found_treshold, acceptance_d
         (startX, startY) = (int(i[1][0] * i[2]), int(i[1][1] * i[2]))
         (endX, endY) = (int((i[1][0] + tW) * i[2]), int((i[1][1] + tH) * i[2]))
 
-        if i[0] > (found_treshold * 100000):
+        if i[0] > (found_treshold * 100000):###
             if abs(startX-startX_T) > acceptance_diff and abs(startY-startY_T) > acceptance_diff:
                 # draw a bounding box around the detected result
                 cv2.rectangle(display_image, (startX, startY), (endX, endY), (255, 0, 0), 2)
@@ -171,7 +171,7 @@ def show_image_list(list_images, list_titles=None, list_cmaps=None, grid=True, n
     num_cols    = min(num_images, num_cols)
     num_rows    = int(num_images / num_cols) + (1 if num_images % num_cols != 0 else 0)
     # Create a grid of subplots.
-    plt.figure(3)
+    plt.figure(1)
     fig, axes = plt.subplots(num_rows, num_cols, figsize=figsize)
     # Create list of axes for easy iteration.
     if isinstance(axes, np.ndarray):
@@ -214,14 +214,16 @@ def mainly(cam_port, template_path, img_treshold, min_contour_area, margin_cut, 
         cnt = 1
         for i in range(0,rejected_objects): ###
             logger.debug("Failed object %d coords: X(%d,%d) Y(%d,%d)    Correlation: %d", i+1, 
-                        rejected_list[i][0], rejected_list[i][1], rejected_list[i][2], rejected_list[i][3], rejected_list[i][4])   
-    
+                        rejected_list[i][0], rejected_list[i][1], rejected_list[i][2], rejected_list[i][3], rejected_list[i][4])
+               
     if detected_objs != 0:
         logger.info("PASSED")
         logger.info("Number of objects detected: %d",detected_objs)
         for i in range(0,detected_objs):
             logger.info("Passed object %d coords: X(%d,%d) Y(%d,%d)    Correlation: %d", i+1, 
                         detected_list[i][0], detected_list[i][1], detected_list[i][2], detected_list[i][3], detected_list[i][4])   
+        if debg:
+            visualize(failed_image, "Failed IMG. Objects found (red square)", 3) 
         if ver:  
             visualize(display_image, "Objects found (red square)", 1)
     else:
@@ -232,8 +234,8 @@ def mainly(cam_port, template_path, img_treshold, min_contour_area, margin_cut, 
             logger.info("Failed matching object correlation %d: %d", cnt, acceptance) 
             cnt+=1
         if ver:  
-            visualize(failed_image, "Objects found (red square)", 2)
-
+            visualize(failed_image, "Failed IMG. Objects found (red square)", 1)
+    plt.show()
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
