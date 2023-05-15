@@ -63,7 +63,7 @@ class callFunction:
                         else: Text += word
                     return Text, None, None, None
                 else: print('Error in Function Call. Text is empty.') ; return None, None, None, None 
-            else: print('Error in Function Call. Bad use of parentheses.') ; return None, None, None, None 
+            else: print('Error in Function Call. Bad use of parentheses or quotation marks.') ; return None, None, None, None 
 
 
         elif self.__findIcon.match(self.name):
