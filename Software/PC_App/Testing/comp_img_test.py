@@ -24,7 +24,7 @@ sample_wrong18cm_dir_list = os.listdir(sample_wrong18cm_dir)
 comparisons = {k: [None, [None, None]] for k in reference_dir_list}
 
 info = {
-    'REF IMG': [f"T{i:02}.png" for i in range(1, len(reference_dir_list))],
+    'REF IMG': [f"T{i:02}.png" for i in range(1, len(reference_dir_list) + 1)],
     'TP': [],
     'TN_0': [],
     'TN_1': [],
@@ -95,7 +95,7 @@ def print_table():
     Total_TP = Total_TN = Total_FP = Total_FN = 0
 
     # Categorize metrics into corresponding categories
-    for i in range(1, len(comparisons)):
+    for i in range(1, len(comparisons)+1):
         ref_name = f"T{i:02}.png"
 
         # Results with similar images (expecting PASS)
