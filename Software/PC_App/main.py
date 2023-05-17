@@ -35,7 +35,7 @@ MIN_CONTOUR_AREA = 300
 # Margin to cut screen edges (pixels)
 MARGIN_CUT = 10
 # Resize values for input image
-XSIZE = 1800
+XSIZE = 2400
 YSIZE = 2400
 # Treshold for input image grayscale (0-255)
 IMG_TRESHOLD = args["grayscale"]
@@ -44,7 +44,7 @@ TEMPLATE_SIZE = 100
 # Treshold for matching template 
 FOUND_TRESHOLD = args["acceptance"]
 # Acceptance difference between found objects (pixels)
-ACCEPTANCE_DIFF = 20
+ACCEPTANCE_DIFF = 30
 # Iterations for Match Template
 MT_ITERATIONS = args["iterations"]
 # Flag indicating if debugg mode
