@@ -52,8 +52,7 @@ def template_init(template_path):
 def inputIMG_process(input_image, img_treshold, min_contour_area, margin_cut, xsize, ysize):
     """ Binarize input image, find screen contour and crop image,
         then resize to standard MACRO defeined size""" 
-    (tH, tW) = input_image.shape[:2]
-    aspect_ratio = tH/tW
+    
     gray_input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
     _, img_thresh = cv2.threshold(gray_input_image,img_treshold,255,cv2.THRESH_BINARY )
 
@@ -63,6 +62,10 @@ def inputIMG_process(input_image, img_treshold, min_contour_area, margin_cut, xs
         if cv2.contourArea(contour) > min_contour_area:
             [X, Y, W, H] = cv2.boundingRect(contour)   
     gray_cropped_input_image = gray_input_image[Y+margin_cut : Y+H-margin_cut, X+margin_cut : X+W-margin_cut]
+
+    (tH, tW) = gray_cropped_input_image.shape[:2]
+    aspect_ratio = tH/tW
+
     # Resize input image
     cropped_input_image = cv2.resize(gray_cropped_input_image, (xsize, round(xsize*aspect_ratio)))
     _, binary_cropped_input_image = cv2.threshold(cropped_input_image,150,255,cv2.THRESH_BINARY)
@@ -117,18 +120,18 @@ def findObjects(foundList, template, display_image, found_treshold, acceptance_d
     (tH, tW) = template.shape[:2]
 
     # Variables init
-    startX_T = startY_T = endX_T = endY_T = detected_objs = rejected_objects = first_loop = rating = 0
+    startX_T = startY_T = detected_objs = rejected_objects = first_loop = rating = 0
     detected_list = []
     rejected_list = []
     tmp_detected_list = []
-    tmp_rejected_list = []
     max_correlated_list = []
     max_correlated_values = []
     init_detected_list = []
     detected_temp = [0,0,0,0,0]
     failed_image = cv2.cvtColor(display_image, cv2.COLOR_GRAY2BGR)
     display_image = cv2.cvtColor(display_image, cv2.COLOR_GRAY2BGR)
-
+    
+    print(foundList)
     # Loop to find objects
     for i in foundList:
         (startX, startY) = (int(i[1][0] * i[2]), int(i[1][1] * i[2]))
@@ -142,44 +145,43 @@ def findObjects(foundList, template, display_image, found_treshold, acceptance_d
             first_loop +=1
             init_detected_list.append(detected_temp)
         else:
-            #cv2.putText(failed_image, str(cnt), (startX, endY), cv2.FONT_HERSHEY_SIMPLEX, 5, (255,0,0), 8, cv2.LINE_AA)
             rejected_list.append(detected_temp)
             rejected_objects+=1
         startX_T = startX
         startY_T = startY
-        endX_T = endX
-        endY_T = endY
     tmp_detected_list.append(init_detected_list)
 
-    print(tmp_detected_list)
-    cnt = tmp_max = 0
-    for i in tmp_detected_list:#    [ [(),(),(),()] ; [(),()] ]
-        for j in i:
-            if j[4]>tmp_max: 
-                tmp_max = j[4]
-        max_correlated_list.append(j)
-    print(max_correlated_list)
+    tmp_max = 0
+    for i in tmp_detected_list: #    [ [(),(),(),()] ; [(),()] ]
+        if len(i)>1:
+            for j in i:
+                if j[4]>tmp_max: 
+                    tmp_max = j[4]
+            max_correlated_list.append(j)
+        elif len(i)==1: max_correlated_list.append(i[0])
+        else: max_correlated_list.append(i)
 
     tmp_max=0
     for i in max_correlated_list:
-        if i[4]>tmp_max: max_correlated_values.append(i[4])
-        tmp_max = i[4]
-    print(max_correlated_values)
+        if len(i)>1:
+            if i[4]>tmp_max: max_correlated_values.append(i[4])
+            tmp_max = i[4]
 
-    for i in max_correlated_list:
-        rating = i[4]/(max(max_correlated_values)/100)
-        if rating > 80:
-            # save result and draw a bounding box around passed image
-            cv2.rectangle(display_image, (i[0], i[2]), (i[1], i[3]), (255, 0, 0), 2)
-            detected_temp = [i[0], i[1], i[2], i[3], i[4]]
-            detected_objs+=1
-            detected_list.append(detected_temp)
-        else:
-            # save result and draw a bounding box around failed image
-            cv2.rectangle(failed_image, (i[0], i[2]), (i[1], i[3]), (255, 0, 0), 2)
-            detected_temp = [i[0], i[1], i[2], i[3], i[4]]
-            rejected_objects+=1
-            rejected_list.append(detected_temp)
+    if len(max_correlated_values)!=0:
+        for i in max_correlated_list:
+            rating = i[4]/(max(max_correlated_values)/100)
+            if rating > 85:
+                # save result and draw a bounding box around passed image
+                cv2.rectangle(display_image, (i[0], i[2]), (i[1], i[3]), (255, 0, 0), 2)
+                detected_temp = [i[0], i[1], i[2], i[3], i[4]]
+                detected_objs+=1
+                detected_list.append(detected_temp)
+            else:
+                # save result and draw a bounding box around failed image
+                cv2.rectangle(failed_image, (i[0], i[2]), (i[1], i[3]), (255, 0, 0), 2)
+                detected_temp = [i[0], i[1], i[2], i[3], i[4]]
+                rejected_objects+=1
+                rejected_list.append(detected_temp)
 
     return detected_list, detected_objs, display_image, rejected_list, rejected_objects, failed_image
 
@@ -227,7 +229,10 @@ def show_image_list(list_images, list_titles=None, list_cmaps=None, grid=True, n
     fig.tight_layout()
     #_ = plt.show()
 
-#-------------------MAIN FUNCTION-------------------#
+
+
+#--------------------------------------MAIN FUNCTION-------------------------------------------#
+
 def mainly(cam_port, template_path, img_treshold, min_contour_area, margin_cut, xsize, ysize,
             template_size, mt_iterations, found_treshold, acceptance_diff, debg, ver):  
     logger = logger_init()
@@ -253,7 +258,6 @@ def mainly(cam_port, template_path, img_treshold, min_contour_area, margin_cut, 
                         rejected_list[i][0], rejected_list[i][1], rejected_list[i][2], rejected_list[i][3], rejected_list[i][4])
                
     if detected_objs != 0:
-
         logger.info("PASSED")
         logger.info("Number of objects detected: %d",detected_objs)
         for i in range(0,detected_objs):
@@ -267,6 +271,11 @@ def mainly(cam_port, template_path, img_treshold, min_contour_area, margin_cut, 
         logger.warning("FAILED")
         cnt = 1
         for i in foundList:
+            (tH, tW) = template.shape[:2]
+            (startX, startY) = (int(i[1][0] * i[2]), int(i[1][1] * i[2]))
+            (endX, endY) = (int((i[1][0] + tW) * i[2]), int((i[1][1] + tH) * i[2]))
+            # draw a bounding box around failed image
+            cv2.rectangle(failed_image, (startX, startY), (endX, endY), (255, 0, 0), 2)
             acceptance = i[0]
             logger.info("Failed matching object correlation %d: %d", cnt, acceptance) 
             cnt+=1

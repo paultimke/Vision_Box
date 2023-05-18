@@ -1,0 +1,17 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "args": ["-f", "find_object", "-c", "Testing/screens_cam18/T03_cam_18.png", "-t", "Testing/templates/gota.png", "-v", "1", "-a", "50"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
