@@ -9,6 +9,9 @@ Software/Illumination_FW/dependencies.lock
 # MacOs specific files
 *.DS_Store
 
+# Access keys
+*accessKeys.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
