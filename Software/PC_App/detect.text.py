@@ -55,7 +55,6 @@ def get_words_and_mark(responses, img_word, img_line):
             line=[i['DetectedText']]
             img_line, box=make_boxes(i['DetectedText'], i['Geometry']['BoundingBox'], img_line)
             line.append(box)
-            #print('Geometry:  ', i['Geometry']['BoundingBox'], 'wordsss: ', i['DetectedText']) 
             l_lines.append(tuple(line))
         
         
@@ -97,15 +96,10 @@ def find_text(user_text,img ):
 
     found_text=compare_text(user_text, l_lines, l_words)
 
-    #print(found_text)
-
-    #print(l_words)
-    #print(l_lines)
-
     cv2.imshow('Word found', img1)
     cv2.imshow('Type found', img2)
     cv2.waitKey(0)
-    #print(response)
+
     return found_text
 
     
