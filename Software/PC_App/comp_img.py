@@ -18,7 +18,6 @@ def order_points(pts):
 
 def reorder_corner_points(corners):
     Corners_ = []
-    tr, tl, bl, br = [(corner[0], corner[1]) for corner in corners][0:4]
     for corner in corners:
         Corners_.append([(corner[0], corner[1])])
 
