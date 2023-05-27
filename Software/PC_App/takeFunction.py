@@ -16,36 +16,52 @@ class callFunction:
             check = True
         return check
     
-    def evaluate(self):
+    def parse(self):
         """ Evaulate if function type exists and send correct command.
             Returns tuple of four; first is always a str, for every case second, 
             third and fourth values are None, except when FICON with rgb values input."""
         
         if self.__Status.match(self.name):
-            function = self.name.split('TESTSTATUS')
-            if function[1] == '(START)': return 'START', None, None, None
-            elif function[1] == '(END)': return 'END', None, None, None
-            else: print('Error in Function Call. Function only accepts START or END entry.') ; return None, None, None, None 
+            command_name = 'TESTSTATUS'
+            function = self.name.split(command_name)
+            if function[1] == '(START)': return (command_name, 'START')
+            elif function[1] == '(END)': return (command_name, 'END')
+            else: print('Error in Function Call. Function only accepts START or END entry.') ; return (None, None)
 
 
         elif self.__findImage.match(self.name):
+            ret_val = (None, None)
+
+            command_name = 'COMPIMAGE'
             function = self.name.split('COMPIMAGE')
             if  ( function[1].startswith('(')) and (function[1].endswith(')') ):
                 entryTXT = Text = '' ; cnt = 0
                 # remove ( ) and spaces
                 entryTXT = function[1].translate({ord(i): None for i in '( )'})
                 # remove ' "
-                if (entryTXT.startswith('"') and entryTXT.endswith('"')): Text = entryTXT.replace('"', '')
-                elif (entryTXT.startswith("'") and entryTXT.endswith("'")): Text = entryTXT.replace("'", '')
-                else: print('Error in Function Call. Bad use of quotation marks.') ; return None, None, None, None 
+                if (entryTXT.startswith('"') and entryTXT.endswith('"')): 
+                    Text = entryTXT.replace('"', '')
+                elif (entryTXT.startswith("'") and entryTXT.endswith("'")): 
+                    Text = entryTXT.replace("'", '')
+                else: 
+                    print('Error in Function Call. Bad use of quotation marks.') 
+
                 # check if null
-                if len(Text) > 0: return Text, None, None, None
-                else: print('Error in Function Call. Path is empty.') ; return None, None, None, None 
-            else: print('Error in Function Call. Bad use of parentheses.') ; return None, None, None, None 
+                if len(Text) > 0: 
+                    ret_val = (command_name, Text)
+                else: 
+                    print('Error in Function Call. Path is empty.')
+            else: 
+                print('Error in Function Call. Bad use of parentheses.')
+            
+            return ret_val
 
 
         elif self.__findText.match(self.name):
-            function = self.name.split('FTEXT')
+            ret_val = (None, None)
+
+            command_name = 'FTEXT'
+            function = self.name.split(command_name)
             if ( function[1].startswith('("') and function[1].endswith('")') ) or ( function[1].startswith("('") and (function[1].endswith("')")) ):
                 entryTXT = Text = '' ; cnt = 0
                 # remove (" ") , (' ')
@@ -61,13 +77,20 @@ class callFunction:
                         cnt+=1
                         if cnt < len(words): Text = Text + word + ' '
                         else: Text += word
-                    return Text, None, None, None
-                else: print('Error in Function Call. Text is empty.') ; return None, None, None, None 
-            else: print('Error in Function Call. Bad use of parentheses or quotation marks.') ; return None, None, None, None 
+                    ret_val = (command_name, Text)
+                else: 
+                    print('Error in Function Call. Text is empty.') 
+            else: 
+                print('Error in Function Call. Bad use of parentheses or quotation marks.') 
+            
+            return ret_val
 
 
         elif self.__findIcon.match(self.name):
-            function = self.name.split('FICON')
+            ret_val = (None, None)
+
+            command_name = 'FICON'
+            function = self.name.split(command_name)
             if ( function[1].startswith('(')) and (function[1].endswith(')') ):
                 entryTXT = Text = '' ; cnt = 0
                 # remove ( ) and spaces 
@@ -75,27 +98,31 @@ class callFunction:
                 #separate words in list 
                 words = entryTXT.split(',') ; cnt = 0
                 # remove ' " 
-                if (words[0].startswith('"') and words[0].endswith('"')): words[0] = words[0].replace('"', '')
-                elif (words[0].startswith("'") and words[0].endswith("'")): words[0] = words[0].replace("'", '')
-                else: print('Error in Function Call. Bad use of quotation marks.') ; return None, None, None, None 
+                if (words[0].startswith('"') and words[0].endswith('"')): 
+                    words[0] = words[0].replace('"', '')
+                elif (words[0].startswith("'") and words[0].endswith("'")): 
+                    words[0] = words[0].replace("'", '')
+                else: 
+                    print('Error in Function Call. Bad use of quotation marks.')
                 if len(words) == 1:
-                    return words[0], None, None, None
-                elif len(words) == 4:
-                    for i in range(1,4):
-                        try: int(words[i])
-                        except: print('Error in Function Call. Expected int type for RGB values') ; return None, None, None, None 
-                    return words[0], int(words[1]), int(words[2]), int(words[3])
-                else: print('Error in Function Call. Expected only 3 int type RGB values') ; return None, None, None, None 
-            else: print('Error in Function Call. Bad use of parentheses.') ; return None, None, None, None 
+                    ret_val = (command_name, words[0])
+                else: 
+                    print('Error in Function Call. Expected only one path to image') 
+            else: 
+                print('Error in Function Call. Bad use of parentheses.') 
+        else: 
+            print('Error in Function Call') 
 
-        else: print('Error in Function Call') ; return None, None, None, None 
+        return ret_val
 
 
 # Example to test class#
-func = input("Receive Function: ")
+if __name__ == '__main__':
+    # TODO: Throw error message on unrecognized command
+    func = input("Receive Function: ")
 
-Function = callFunction(func)
-if Function.check():
-    print(Function.evaluate())
+    Function = callFunction(func)
+    if Function.check():
+        print(Function.parse())
 
 
