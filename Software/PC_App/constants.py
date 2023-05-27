@@ -1,5 +1,8 @@
 ################# File for handling all important constants ###################
 
+###### General program constants
+DEFAULT_CAM_PORT = 1                  # Default USB port for camera
+
 ###### FIND OBJECT constants
 FOBJ_GRAY_THRESHOLD = 100             # Threshold for input image grayscale (0 - 255)
 FOBJ_RESIZE_INPUT_STD = (2400, 2400)  # Standard resize values for input image (x,y)
