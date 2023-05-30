@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import imutils 
 import logging
+import constants as cnst
 
 #----------------Create and configure logger----------------# 
 def logger_init():
@@ -49,12 +50,15 @@ def template_init(template_path):
     return template
 
 
-def inputIMG_process(input_image, img_treshold, min_contour_area, margin_cut, xsize, ysize):
+def inputIMG_process(input_image, min_contour_area, margin_cut):
     """ Binarize input image, find screen contour and crop image,
         then resize to standard MACRO defeined size""" 
     
+    img_threshold = cnst.FOBJ_GRAY_THRESHOLD
+    (xsize, ysize) = cnst.FOBJ_RESIZE_INPUT_STD
+
     gray_input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
-    _, img_thresh = cv2.threshold(gray_input_image,img_treshold,255,cv2.THRESH_BINARY )
+    _, img_thresh = cv2.threshold(gray_input_image, img_threshold, 255, cv2.THRESH_BINARY)
 
     # Find screen contours and crop input image
     Contours,_ = cv2.findContours(img_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
@@ -68,12 +72,14 @@ def inputIMG_process(input_image, img_treshold, min_contour_area, margin_cut, xs
 
     # Resize input image
     cropped_input_image = cv2.resize(gray_cropped_input_image, (xsize, round(xsize*aspect_ratio)))
-    _, binary_cropped_input_image = cv2.threshold(cropped_input_image,150,255,cv2.THRESH_BINARY)
+    _, binary_cropped_input_image = cv2.threshold(cropped_input_image, 150, 255, cv2.THRESH_BINARY)
     return binary_cropped_input_image
 
 
-def template_process(template, template_size):
+def template_process(template):
     """ Resize template to standard MACRO defined size and apply Canny filter """
+    template_size = cnst.FOBJ_RESIZE_TEMP_STD
+
     (tH, tW) = template.shape[:2]
     aspect_ratio = tH/tW
     cropped_template = cv2.resize(template, (template_size, round(template_size*aspect_ratio))) 
@@ -83,8 +89,10 @@ def template_process(template, template_size):
     return template
     
 
-def matchTemplate(input_img, template, mt_iterations):
+def matchTemplate(input_img, template):
     """ Iterate input image with different sizes to match with template """
+    mt_iterations = cnst.FOBJ_MT_ITERATIONS
+
     # Template Height and Width
     (tH, tW) = template.shape[:2]
 
@@ -114,8 +122,12 @@ def matchTemplate(input_img, template, mt_iterations):
     return foundList
 
 
-def findObjects(foundList, template, display_image, found_treshold, acceptance_diff):
+def findObjects(foundList, template, display_image):
     """ Iterate in list of matched objetcs and filter by correlation value and position """
+    
+    found_treshold = cnst.FOBJ_MATCH_THRESHOLD
+    acceptance_diff = cnst.FOBJ_ACCEPTANCE_DIFF
+
     # Template Height and Width
     (tH, tW) = template.shape[:2]
 
@@ -233,17 +245,19 @@ def show_image_list(list_images, list_titles=None, list_cmaps=None, grid=True, n
 
 #--------------------------------------MAIN FUNCTION-------------------------------------------#
 
-def mainly(cam_port, template_path, img_treshold, min_contour_area, margin_cut, xsize, ysize,
-            template_size, mt_iterations, found_treshold, acceptance_diff, debg, ver):  
+def mainly(cam_port, template_path, debg):  
+    min_contour_area = 300   # Minimun contour area to search screen (pixels)
+    margin_cut = 10          # Margin to cut screen edges (pixels)
+
     logger = logger_init()
     raw_input_image = inputIMG_init(cam_port)
     raw_template = template_init(template_path)
 
-    inputIMG = inputIMG_process(raw_input_image, img_treshold, min_contour_area, margin_cut, xsize, ysize)
-    template = template_process(raw_template, template_size)  
+    inputIMG = inputIMG_process(raw_input_image, min_contour_area, margin_cut)
+    template = template_process(raw_template)  
 
-    foundList = matchTemplate(inputIMG, template, mt_iterations)
-    detected_list, detected_objs, display_image, rejected_list, rejected_objects, failed_image = findObjects(foundList, template, inputIMG, found_treshold, acceptance_diff)
+    foundList = matchTemplate(inputIMG, template)
+    detected_list, detected_objs, display_image, rejected_list, rejected_objects, failed_image = findObjects(foundList, template, inputIMG)
     
     if debg:
         list_images = [raw_template, raw_input_image, template, inputIMG]
@@ -265,8 +279,7 @@ def mainly(cam_port, template_path, img_treshold, min_contour_area, margin_cut, 
                         detected_list[i][0], detected_list[i][1], detected_list[i][2], detected_list[i][3], detected_list[i][4])   
         if debg:
             visualize(failed_image, "Failed IMG. Objects found (red square)", 3) 
-        if ver:  
-            visualize(display_image, "Objects found (red square)", 1)
+
     else:
         logger.warning("FAILED")
         cnt = 1
@@ -279,8 +292,7 @@ def mainly(cam_port, template_path, img_treshold, min_contour_area, margin_cut, 
             acceptance = i[0]
             logger.info("Failed matching object correlation %d: %d", cnt, acceptance) 
             cnt+=1
-        if ver:  
-            visualize(failed_image, "Failed IMG. Objects found (red square)", 1)
+
     plt.show()
     cv2.waitKey(0)
     cv2.destroyAllWindows()

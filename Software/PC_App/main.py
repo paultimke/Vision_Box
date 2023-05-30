@@ -1,62 +1,44 @@
 # Import Libraries
-from cv2 import *
-import argparse
+from typing import List
+import sys
+import constants as cnst
+import takeFunction as parser
 import find_object as fOBJ
 
-#------Construct the argument parser and parse the arguments------#
-ap = argparse.ArgumentParser()
-ap.add_argument("-c", "--cam", default="1",
-                help="Camera port select or path to input image")
-ap.add_argument("-t", "--template", 
-                help="Path to template image")
-ap.add_argument("-f", "--function", required=True, choices=['find_object', 'find_text', 'compare_image', 'set_light'],
-                help= "Select function to run. (find_object, find_text, compare_image, set_light)")
-ap.add_argument("-v", "--visualize", type=bool, default=False,
-                help="Flag indicating whether or not to visualize each iteration. (1=True)")
-ap.add_argument("-j", "--iterations", type=int, default=100, 
-                help= "Iterations to apply Match Template algorithm. Default=100")
-ap.add_argument("-g", "--grayscale", type=int, default=100,
-                help= "Grayscale treshold for processing input image. Default=100")
-ap.add_argument("-a", "--acceptance", type=int, default=95,
-                help = "Acceptance treshold for matching template. Default=84")
-ap.add_argument("-d", "--debugg", type=bool, default=False,
-                help= "Display images and info for debugging purposes")
-args = vars(ap.parse_args())
-
-#----------------------MACROS----------------------#
-# Camera port
-CAM_PORT = args["cam"] 
-# Template to compare
-TEMPLATE_PATH = args["template"]  
-# Enum for choosing function
-FUNCTION = args["function"]
-# Minimun contour area to search screen (pixels)
-MIN_CONTOUR_AREA = 300
-# Margin to cut screen edges (pixels)
-MARGIN_CUT = 10
-# Resize values for input image
-XSIZE = 2400
-YSIZE = 2400
-# Treshold for input image grayscale (0-255)
-IMG_TRESHOLD = args["grayscale"]
-# Template resize (pixels)
-TEMPLATE_SIZE = 100
-# Treshold for matching template 
-FOUND_TRESHOLD = args["acceptance"]
-# Acceptance difference between found objects (pixels)
-ACCEPTANCE_DIFF = 30
-# Iterations for Match Template
-MT_ITERATIONS = args["iterations"]
 # Flag indicating if debugg mode
-DEBG = args["debugg"]
-# Flag indicating if visualize result image
-VER = args["visualize"]
+DEBG = False
+
+def is_CLI_args_valid(args: List[str]) -> bool:
+    return len(args) == 2
 
 #-------------------MAIN FUNCTION-------------------#
 def main():  
-    if FUNCTION == "find_object":
-        fOBJ.mainly(CAM_PORT, TEMPLATE_PATH, IMG_TRESHOLD, MIN_CONTOUR_AREA, MARGIN_CUT, XSIZE, YSIZE,
-                                        TEMPLATE_SIZE, MT_ITERATIONS, FOUND_TRESHOLD, ACCEPTANCE_DIFF, DEBG, VER)
+    # Get command line arguments
+    command_args = None
+    if is_CLI_args_valid(sys.argv):
+        command = parser.callFunction(sys.argv[1])
+        if command.check():
+            command_args = command.parse()
+
+    # Initialize cam port
+    cam_port = "Testing/screens_cam18/T03_cam_18.png" #''cnst.DEFAULT_CAM_PORT
+
+    # Call corresponding command
+    match command_args:
+        # TODO: Add suport for HELP, EXAMPLE and SETLIGHT commands
+        case ('TESTSTATUS', condition):
+            pass
+        case ('FTEXT', text):
+            pass
+        case ('FICON', path):
+            # Acceptance match threshold before refactor was on 50, although
+            # the default is 95
+            fOBJ.mainly(cam_port, path, DEBG)
+        case ('COMPIMAGE', path):
+            pass
+        case _:
+            # Log error message of unrecognized command
+            pass
 
 if __name__ == "__main__":
     main()
