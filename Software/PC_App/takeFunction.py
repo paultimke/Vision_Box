@@ -20,18 +20,20 @@ class callFunction:
         """ Evaulate if function type exists and send correct command.
             Returns tuple of four; first is always a str, for every case second, 
             third and fourth values are None, except when FICON with rgb values input."""
-        
+        ret_val = (None, None)
+
         if self.__Status.match(self.name):
             command_name = 'TESTSTATUS'
             function = self.name.split(command_name)
-            if function[1] == '(START)': return (command_name, 'START')
-            elif function[1] == '(END)': return (command_name, 'END')
-            else: print('Error in Function Call. Function only accepts START or END entry.') ; return (None, None)
-
+            if function[1] == '(START)': 
+                ret_val =  (command_name, 'START')
+            elif function[1] == '(END)': 
+                ret_val =  (command_name, 'END')
+            else: 
+                print('Error in Function Call. Function only accepts START or END entry.')
+            return ret_val
 
         elif self.__findImage.match(self.name):
-            ret_val = (None, None)
-
             command_name = 'COMPIMAGE'
             function = self.name.split('COMPIMAGE')
             if  ( function[1].startswith('(')) and (function[1].endswith(')') ):
@@ -53,9 +55,7 @@ class callFunction:
                     print('Error in Function Call. Path is empty.')
             else: 
                 print('Error in Function Call. Bad use of parentheses.')
-            
             return ret_val
-
 
         elif self.__findText.match(self.name):
             ret_val = (None, None)
@@ -82,7 +82,7 @@ class callFunction:
                     print('Error in Function Call. Text is empty.') 
             else: 
                 print('Error in Function Call. Bad use of parentheses or quotation marks.') 
-            
+    
             return ret_val
 
 
@@ -110,7 +110,8 @@ class callFunction:
                     print('Error in Function Call. Expected only one path to image') 
             else: 
                 print('Error in Function Call. Bad use of parentheses.') 
-        else: 
+        else:
+            ret_val = (None, None) 
             print('Error in Function Call') 
 
         return ret_val
@@ -124,5 +125,3 @@ if __name__ == '__main__':
     Function = callFunction(func)
     if Function.check():
         print(Function.parse())
-
-
