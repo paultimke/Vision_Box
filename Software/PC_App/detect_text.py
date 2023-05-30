@@ -2,11 +2,12 @@ import csv
 import boto3
 import cv2
 import copy
-
-
-
+import crop_screen
 def init():
-    with open('Visionbox_accessKeys.csv','r')as input:
+    """Initializes AWS client for text rekognition"""
+    
+    #Reads AWS access keys from csv
+    with open('Software\PC_App\Visionbox_accessKeys.csv','r')as input:
         next(input)
         reader=csv.reader(input)
         for line in reader:
@@ -19,7 +20,7 @@ def init():
     return client
 
 def make_boxes(Text, Geometry, img):
-
+    """Marks text's bounding box in the image"""
     x,y,w,h= get_pixelcount(Geometry, img)
 
     text = "".join([c if ord(c) < 128 else "" for c in Text]).strip()
@@ -28,7 +29,8 @@ def make_boxes(Text, Geometry, img):
 
     return(img, [x,y,w,h])
 
-def get_pixelcount(Boundingbox,  img):
+def get_pixelcount(Boundingbox,  img)-> int:
+    """Converts AWS bounding box values into absolute pixel values"""
     image_h,image_w, image_c= img.shape
 
     x = int(Boundingbox['Left']*image_w)
@@ -39,75 +41,95 @@ def get_pixelcount(Boundingbox,  img):
 
     return x,y,w,h
 
-def get_words_and_mark(responses, img_word, img_line):
+
+
+
+def get_words_and_mark(responses, img_word, img_line)  :
+    """Separate AWS dictionary into lists that includes, the word or line and the goemetry of the bounging box"""
+    #Bounding box: x,y,w,h
     l_words=[] 
     l_lines=[]
-    for x,i in enumerate(responses['TextDetections']):
-        #print(i['Confidence'])
+    for i in(responses['TextDetections']):
         if i['Type'] =='WORD':
-            word=[i['DetectedText']]
-            img_word, box=make_boxes(i['DetectedText'], i['Geometry']['BoundingBox'], img_word)
-            word.append(box)
-            l_words.append(tuple(word))
-            
+            word=i['DetectedText']
+            img_word, box=make_boxes(i['DetectedText'], i['Geometry']['BoundingBox'], img_word)            
+            box.insert(0, word)
+            l_words.append(tuple(box))
 
         elif i['Type'] =='LINE':
-            line=[i['DetectedText']]
+            line=i['DetectedText']
+            characters=[*i['DetectedText']]
             img_line, box=make_boxes(i['DetectedText'], i['Geometry']['BoundingBox'], img_line)
-            line.append(box)
-            l_lines.append(tuple(line))
-        
-        
+            box.insert(0, line)
+            l_lines.append(tuple(box))
 
-    return l_words,l_lines, img_word, img_line
+    return l_lines, img_word, img_line
 
 
-def compare_text(input_text, l_line, l_word):
-    control=input_text.split()
+def compare_text(input_text, l_line)->list:
+    """Compares the user's input with the words found and returns the text with the goemetry if there is any match """
     found_text=[]
-    print('imput text: ' , input_text)
-    if len(control)==1:
-        for i in l_word:            
-            if i[0]==input_text:
-                found_text.append(i)
-    elif len(control)>1:
-        for i in l_line:
-            if i[0]==input_text:
-                found_text.append(i)
+    for i in l_line:
+        if i[0]==input_text:
+            found_text.append(i)
+
+        start_index=0
+        for j in range(len(i[0])):
+            index=i[0].find(input_text,start_index)
+            if (index!=-1):
+                start_index=index+1
+                characters=[*i[0]]
+                length=len(characters)
+                character_size=int(i[3]/ (length))
+                found_text.append((input_text, i[1]+ character_size*index, i[2], character_size*len(input_text), i[4]))
 
     return found_text
 
+def show_images (found_text, img, img1, img2):
+    """Shows matching texts"""
+    for i in range(len(found_text)):
+        Text=found_text[i][0]
+        x=found_text[i][1]
+        y=found_text[i][2]
+        w= found_text[i][3]
+        h=found_text[i][4]
+        text = "".join([c if ord(c) < 128 else "" for c in Text]).strip()
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cv2.putText(img, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
 
-def find_text(user_text,img ):
+    cv2.imshow('Word found', img1)
+    cv2.imshow('Line found', img2)
+    cv2.imshow('Text found', img)
+    cv2.waitKey(0)
+
+
+def find_text(client, user_text, img )-> list:
+    """"""
+
     img1=copy.deepcopy(img)
     img2=copy.deepcopy(img)
 
-
-
-    #source_bytes = cv2.imencode('.png', img)[1].tobytes()
-
+    source_bytes = cv2.imencode('.png', img)[1].tobytes()
     response= client.detect_text(Image={'Bytes':source_bytes} 
                                         )
-
-    l_words,l_lines, img1, img2=get_words_and_mark(response, img1,img2)
-
-
-
-
-    found_text=compare_text(user_text, l_lines, l_words)
-
-    cv2.imshow('Word found', img1)
-    cv2.imshow('Type found', img2)
-    cv2.waitKey(0)
+    
+    l_lines, img1, img2=get_words_and_mark(response, img1,img2)
+    found_text=compare_text(user_text, l_lines)
+    
+    
+    
+    show_images(found_text, img, img1, img2)
 
     return found_text
 
     
-client=init()
-photo='wireframes\wireframe4.png'
-img = cv2.imread(photo)
-with open(photo,'rb') as source_image:
-    source_bytes=source_image.read()
 
-
-print(find_text('Date',img))
+if __name__ == '__main__':
+    client=init()
+    photo='Software\PC_App\Testing\screens_cam18\T01_cam_18.png'
+    img = cv2.imread(photo)
+    x,y,c=img.shape
+    print('size: ' ,img.shape)
+    img=crop_screen.StraightenAndCrop(img, x, y)
+    
+    print(find_text(client, 'o', img))
