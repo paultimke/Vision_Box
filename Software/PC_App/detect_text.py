@@ -3,9 +3,11 @@ import boto3
 import cv2
 import copy
 import crop_screen
+
 def init():
     """Initializes AWS client for text rekognition"""
     
+
     #Reads AWS access keys from csv
     with open('Software\PC_App\Visionbox_accessKeys.csv','r')as input:
         next(input)
@@ -37,7 +39,7 @@ def get_pixelcount(Boundingbox,  img)-> int:
     y = int(Boundingbox['Top']*image_h)
 
     w = int(Boundingbox['Width']*image_w)
-    h =int(Boundingbox['Height']*image_h)
+    h = int(Boundingbox['Height']*image_h)
 
     return x,y,w,h
 
@@ -58,11 +60,10 @@ def get_words_and_mark(responses, img_word, img_line)  :
 
         elif i['Type'] =='LINE':
             line=i['DetectedText']
-            characters=[*i['DetectedText']]
             img_line, box=make_boxes(i['DetectedText'], i['Geometry']['BoundingBox'], img_line)
             box.insert(0, line)
             l_lines.append(tuple(box))
-
+    
     return l_lines, img_word, img_line
 
 
@@ -102,22 +103,33 @@ def show_images (found_text, img, img1, img2):
     cv2.imshow('Text found', img)
     cv2.waitKey(0)
 
+def different_size_in_line(found_text, user_text, l_lines):
+    """Checks for different sizes in the same line and joins the bounding box """
+    for i in range(len(l_lines)):
+        y_position1=l_lines[i][2]+l_lines[i][4]
+        for k in range(i+1, len(l_lines)):
+            y_position2=l_lines[k][2]+l_lines[k][4]
+            if (abs(y_position1 - y_position2) < y_position1*.1):
+                if (l_lines[i][0] in user_text) and (l_lines[k][0] in user_text):
+                    found_text.append((user_text, l_lines[i][1], l_lines[i][2], l_lines[i][3]+l_lines[k][3], l_lines[i][4]))
+
+    return found_text
 
 def find_text(client, user_text, img )-> list:
     """"""
-
     img1=copy.deepcopy(img)
     img2=copy.deepcopy(img)
 
     source_bytes = cv2.imencode('.png', img)[1].tobytes()
     response= client.detect_text(Image={'Bytes':source_bytes} 
                                         )
-    
+    #print('response: ', response)
     l_lines, img1, img2=get_words_and_mark(response, img1,img2)
     found_text=compare_text(user_text, l_lines)
     
-    
-    
+    if len(found_text)==0:
+        found_text=different_size_in_line(found_text, user_text, l_lines)
+                    
     show_images(found_text, img, img1, img2)
 
     return found_text
@@ -126,10 +138,9 @@ def find_text(client, user_text, img )-> list:
 
 if __name__ == '__main__':
     client=init()
-    photo='Software\PC_App\Testing\screens_cam18\T01_cam_18.png'
+    photo='Software\PC_App\Testing\screens_cam18\T07_cam_18.png'
     img = cv2.imread(photo)
-    x,y,c=img.shape
+    x, y, c=img.shape
     print('size: ' ,img.shape)
     img=crop_screen.StraightenAndCrop(img, x, y)
-    
-    print(find_text(client, 'o', img))
+    print(find_text(client, '22.0', img))
