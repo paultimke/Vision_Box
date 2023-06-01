@@ -1,5 +1,7 @@
 import numpy as np
 import cv2
+import json
+import constants as cnst
 from typing import Tuple
 
 # Type Alias for Screen Corners
@@ -80,3 +82,37 @@ def StraightenAndCrop(img: cv2.Mat, width: int, height: int) -> cv2.Mat:
     matrix = cv2.getPerspectiveTransform(input_points, converted_points)
     img_output = cv2.warpPerspective(img, matrix, (width, height))
     return img_output
+
+def StraightenAndCrop_Calibrated(img: cv2.Mat, width: int, height: int) -> cv2.Mat:
+    # Get corner coordinates from configuration file
+    with open(cnst.CONFIG_FILE_NAME, "r") as infile:
+        config_data = json.load(infile)
+        corners = [
+            config_data["screen_corners"]["topL"],
+            config_data["screen_corners"]["topR"],
+            config_data["screen_corners"]["botL"],
+            config_data["screen_corners"]["botR"]
+        ]
+    
+    # Desired points values in the output image
+    converted_points = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
+    input_points = np.float32([corners[0], corners[1], corners[2], corners[3]])
+
+    # Perspective transformation
+    matrix = cv2.getPerspectiveTransform(input_points, converted_points)
+    img_output = cv2.warpPerspective(img, matrix, (width, height))
+    return img_output 
+
+if __name__ == '__main__':
+    from comp_img import img_show
+    img = cv2.imread('Testing/screens_vbox_cam/T03_vbox_cam.png')
+    img = cv2.rotate(img, cv2.ROTATE_180)
+    ref = cv2.imread('Testing/screens/T03.png')
+    img_show([img, ref])
+
+    im1 = StraightenAndCrop(img, ref.shape[1], ref.shape[0])
+    #img_show([img, im1, ref])
+
+    im2 = StraightenAndCrop_Calibrated(img, ref.shape[1], ref.shape[0])
+    img_show([im1, im2, ref])
+    print("hola")
