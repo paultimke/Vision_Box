@@ -102,8 +102,7 @@ class callFunction:
                     words[0] = words[0].replace('"', '')
                 elif (words[0].startswith("'") and words[0].endswith("'")): 
                     words[0] = words[0].replace("'", '')
-                else: 
-                    print('Error in Function Call. Bad use of quotation marks.')
+
                 if len(words) == 1:
                     ret_val = (command_name, words[0])
                 else: 
