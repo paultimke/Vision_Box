@@ -8,6 +8,9 @@ class callFunction:
         self.__findImage = re.compile(r'\bCOMPIMAGE\b')
         self.__findText = re.compile(r'\bFTEXT\b')
         self.__findIcon = re.compile(r'\bFICON\b')
+        self.__setLight = re.compile(r'\bSETLIGHT\b')
+        self.__helpMe = re.compile(r'\bHELPME\b')
+        self.__Example = re.compile(r'\bEXAMPLE\b')
 
     def check(self) -> bool:
         """ Check if function object is correctly created """
@@ -109,9 +112,62 @@ class callFunction:
                     print('Error in Function Call. Expected only one path to image') 
             else: 
                 print('Error in Function Call. Bad use of parentheses.') 
+
+        elif self.__setLight.match(self.name):
+            ret_val = (None, None)
+
+            command_name = 'SETLIGHT'
+            function = self.name.split(command_name)
+            if ( function[1].startswith('(')) and (function[1].endswith(')')):
+                entryTXT = Text = ''; cnt = 0
+                # remove ( ) and spaces
+                entryTXT = function[1].translate({ord(i): None for i in '( )'})
+                # separate words in list
+                words = entryTXT.split(',') ; cnt = 0
+                # concatenate text 
+                if len(words) > 0:
+                    for word in words:
+                        cnt+=1
+                        if cnt < len(words): 
+                            Text = Text + word + ' '
+                        else: 
+                            Text += word
+                    try:
+                        lux_val = int(Text)
+                        ret_val = (command_name, lux_val)
+                    except:
+                        print("Error in Function Call. SETLIGHT Argument must be integer")
+                else: 
+                    print('Error in Function Call. Text is empty.') 
+            else:
+                print('Error in Function Call. Bad use of parentheses')
+
+        elif self.__helpMe.match(self.name):
+            ret_val = (None, None)
+
+            command_name = 'HELPME'
+            function = self.name.split(command_name)
+            if (function[1].startswith('(')) or (function[1].endswith(')')):
+                print("Error in Function Call. HELPME takes no arguments")
+            else:
+                ret_val = (command_name, None)
+            return ret_val
+        
+        elif self.__Example.match(self.name):
+            ret_val = (None, None)
+
+            command_name = 'EXAMPLE'
+            function = self.name.split(command_name)
+            if (function[1].startswith('(')) or (function[1].endswith(')')):
+                print("Error in Function Call. EXAMPLE takes no arguments")
+            else:
+                ret_val = (command_name, None)
+            return ret_val
+
+
         else:
             ret_val = (None, None) 
-            print('Error in Function Call') 
+            print(f'Error in Function Call. Unknown {self.name}') 
 
         return ret_val
 
