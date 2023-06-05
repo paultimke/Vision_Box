@@ -6,7 +6,7 @@ import os
 
 # Import modules to test
 sys.path.append('../PC_App')
-from comp_img import CompareImage
+from comp_img import compare_image
  
 # Threshold to trigger succesful match
 ACCEPTANCE_THRESHOLD = 0.6 
@@ -59,7 +59,7 @@ def compare_similar_ims():
             smp_num = int(smp_file_name[1:3])
 
             if ref_num == smp_num:
-                similarity = CompareImage(os.path.join(sample_18cm_dir, smp_file_name), 
+                similarity = compare_image(os.path.join(sample_18cm_dir, smp_file_name), 
                                             os.path.join(reference_dir, ref_filename))
                 comparisons[ref_filename][0] = similarity 
 
@@ -81,7 +81,7 @@ def compare_wrong_ims():
             smp_num = int(smp_file_name[1:3])
 
             if ref_num == smp_num:
-                similarity = CompareImage(os.path.join(sample_wrong18cm_dir, smp_file_name), 
+                similarity = compare_image(os.path.join(sample_wrong18cm_dir, smp_file_name), 
                                             os.path.join(reference_dir, ref_filename))
                 if smp_file_name.endswith('0.png'):
                     comparisons[ref_filename][1][0] = similarity 

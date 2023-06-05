@@ -145,7 +145,7 @@ def CompareIoU(sample_img: cv2.Mat, ref_img: cv2.Mat) -> float:
     logger.debug("VB", f"Structural similarity: {round(sim, 2)}", tag=LOG_TAG)
     return sim
 
-def CompareImage(ref_path: str) -> float:
+def compare_image(ref_path: str) -> float:
     # Read images
     sample_img = capture_cam_frame()
     if sample_img is None:
@@ -178,5 +178,5 @@ if __name__ == '__main__':
     logger.preamble_log()
 
     ref = 'Testing/screens/T03.png'
-    sim = CompareImage(ref)
+    sim = compare_image(ref)
     print(sim)

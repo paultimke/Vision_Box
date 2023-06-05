@@ -5,7 +5,7 @@ import time
 import takeFunction as parser
 import constants as cnst
 import find_object as fOBJ
-from comp_img import CompareImage
+from comp_img import compare_image
 from detect_text import find_text
 from set_light import Set_light
 from help import help_cmd, example_cmd
@@ -19,7 +19,7 @@ mutex = threading.Lock()
 cmd_lookup_table = {
     'FICON': fOBJ.mainly,
     'FTEXT': find_text,
-    'COMPIMAGE': CompareImage,
+    'COMPIMAGE': compare_image,
     'SETLIGHT': Set_light,
     'HELPME': help_cmd,
     'EXAMPLE': example_cmd
