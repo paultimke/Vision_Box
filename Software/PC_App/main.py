@@ -116,10 +116,11 @@ def is_CLI_args_valid(args):
     # separates input. Hence, correct command will have three values. Concatenate
     # them to treat them equally as cmd prompt
     def match_PS_cmdPrompt_formats():
-        tmp_args = sys.argv
+        command = sys.argv[1]
+        command_arg = sys.argv[2]
         sys.argv.clear()
-        sys.argv.append(tmp_args[0])
-        sys.argv.append(f"{tmp_args[1]}({tmp_args[2]})")
+        sys.argv.append(command)
+        sys.argv.append(f"{command}({command_arg})")
 
     match(len(args)):
         case 4:
@@ -134,8 +135,7 @@ def is_CLI_args_valid(args):
             valid = True
             # 3rd argument could be Debug flag on cmd_prompt or command ran in powershell
             if args[2] != '-debug':
-                # TODO: Log error to log file
-                print(f"Error: Unknown argument {args[3]}")
+                match_PS_cmdPrompt_formats
         case 2:
             valid = True
         case _:
