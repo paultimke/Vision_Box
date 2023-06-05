@@ -4,13 +4,12 @@ import time
 import takeFunction as parser
 import find_object as fOBJ
 import constants as cnst
-from vbox_logger import logger_init
+from vbox_logger import logger
 
 ############################### Global variables ##############################
 debug_flag = False
 cmd_queue = []
 mutex = threading.Lock()
-logger = logger_init()
 
 ########################### Main Program Functions ############################
 def main():
@@ -19,10 +18,10 @@ def main():
     if is_CLI_args_valid(sys.argv):
         command = parser.callFunction(sys.argv[1])
         command_args = command.parse()
-        if command_args[-1] == "-debug":
-            debug_flag = True
+        if sys.argv[-1] == "-debug":
+            logger.enable_debug_level()
+        logger.preamble_log()
     else:
-        print(sys.argv)
         print("Must specify one command to run")
         exit()
 

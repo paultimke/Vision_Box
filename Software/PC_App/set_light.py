@@ -1,7 +1,7 @@
 import serial
 import serial.tools.list_ports
 import time
-from main import logger
+from vbox_logger import logger
 
 class light_controller:
     def __init__(self):
