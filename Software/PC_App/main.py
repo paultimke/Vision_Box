@@ -39,6 +39,7 @@ def main():
         if command_args[0] != 'HELPME' and command_args[0] != 'EXAMPLE':
             logger.preamble_log()
         else:
+            logger.close_file()
             os.remove(cnst.DEFAULT_LOG_FILE_NAME)
     else:
         exit()

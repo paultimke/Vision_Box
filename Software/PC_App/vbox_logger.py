@@ -20,6 +20,9 @@ class VBOX_logger:
         # The flag logging.DEBUG is no longer needed since debug printing
         # is now handled through the self.debug_flag variable
         self.logger.setLevel(logging.INFO)
+
+    def close_file(self):
+        self.fileHandler.close()
     
     def preamble_log(self):
         self.logger.info("VISION BOX LOG FILE")
