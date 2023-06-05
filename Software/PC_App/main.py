@@ -18,7 +18,7 @@ def main():
     if is_CLI_args_valid(sys.argv):
         command = parser.callFunction(sys.argv[1])
         command_args = command.parse()
-        if sys.argv[-1] == "-debug":
+        if sys.argv[-1] == cnst.CLI_DEBUG_FLAG_NAME:
             logger.enable_debug_level()
         logger.preamble_log()
     else:
@@ -125,7 +125,7 @@ def is_CLI_args_valid(args):
     match(len(args)):
         case 4:
             match_PS_cmdPrompt_formats()
-            if args[3] == '-debug':
+            if args[3] == cnst.CLI_DEBUG_FLAG_NAME:
                 valid = True
                 match_PS_cmdPrompt_formats()
             else:
@@ -134,7 +134,7 @@ def is_CLI_args_valid(args):
         case 3:
             valid = True
             # 3rd argument could be Debug flag on cmd_prompt or command ran in powershell
-            if args[2] != '-debug':
+            if args[2] != cnst.CLI_DEBUG_FLAG_NAME:
                 match_PS_cmdPrompt_formats
         case 2:
             valid = True

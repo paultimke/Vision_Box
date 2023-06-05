@@ -3,6 +3,7 @@
 ###### General program constants
 DEFAULT_CAM_PORT = 1                  # Default USB port for camera
 CONFIG_FILE_NAME = "config.json"
+CLI_DEBUG_FLAG_NAME = '-verbose'
 
 ###### FIND OBJECT constants
 FOBJ_GRAY_THRESHOLD = 100             # Threshold for input image grayscale (0 - 255)
