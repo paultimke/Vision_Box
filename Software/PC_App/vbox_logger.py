@@ -1,4 +1,5 @@
 import logging
+import constants as cnst
 
 def _configure_logger():
     return VBOX_logger()
@@ -22,6 +23,7 @@ class VBOX_logger:
     
     def preamble_log(self):
         self.logger.info("VISION BOX LOG FILE")
+        self.logger.info(f"Vision Box software version {cnst.SOFTWARE_VERSION}")
         self.logger.info("Starting light level: 0")
         self.logger.info(f"Verbose Output enabled: {self.debug_flag}\n")
 

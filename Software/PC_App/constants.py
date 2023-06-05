@@ -1,6 +1,11 @@
 ################# File for handling all important constants ###################
 
 ###### General program constants
+SW_VERSION_MAJOR = 0
+SW_VERSION_MINOR = 1
+SW_VERSION_REV = 0
+SOFTWARE_VERSION = f"{SW_VERSION_MAJOR}.{SW_VERSION_MINOR}.{SW_VERSION_REV}"
+
 DEFAULT_CAM_PORT = 1                  # Default USB port for camera
 CONFIG_FILE_NAME = "config.json"      # File name for configuration
 CLI_DEBUG_FLAG_NAME = '-verbose'      # CLI argument name to trigger verbose output
@@ -16,3 +21,4 @@ FOBJ_MT_ITERATIONS = 100              # Iterations to apply Match template algor
 ##### COMPARE IMAGE constants
 CIMG_IOU_MATCH_THRESHOLD = 0.8
 CIMG_TEXT_MATCH_THRESHOLD = 0.9
+
