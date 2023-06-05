@@ -89,11 +89,12 @@ def process_command(cmd=None, arg=None):
         out of the common cmd_queue """
     def execute_command(cmd, arg):
         print(f"[VB] >> ACK {cmd}({arg})")
-        #cmd_lookup_table[cmd](arg)
+        cmd_lookup_table[cmd](arg)
             
     # Commands were given directly and no concurrency is happening
     if (cmd, arg) != (None, None):
         execute_command(cmd, arg)
+        return
 
     # TESTSTATUS was started, and cmd_queue is being filled by other thread
     commands_pending = False
