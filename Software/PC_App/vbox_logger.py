@@ -54,7 +54,10 @@ class VBOX_logger:
             self.info(who, msg, tag)
 
     def warning(self, who, msg, tag=""):
-        msg = f"{self.curr_line_num} [{who}] {tag} WARNING: {msg}"
+        if tag == "":
+            msg = f"{self.curr_line_num} [{who}] {tag} {msg}"
+        else:
+            msg = f"{self.curr_line_num} [{who}]  {tag} WARNING: {msg}" 
         self.logger.warning(msg)
         self.curr_line_num += 1
 
