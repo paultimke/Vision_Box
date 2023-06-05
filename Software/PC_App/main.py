@@ -50,7 +50,7 @@ def main():
         case (cmd, arg):
             process_command(cmd, arg)
         case _:
-            logger.error("ERROR: Unknown Error")
+            logger.error("VB", "Unknown Error")
 # END main()
 
 def CLI_handler(condition: str):
@@ -58,7 +58,7 @@ def CLI_handler(condition: str):
     end = False
     if condition == 'START':
         print("\nTEST STARTED")
-        logger.info(f"[PC] TESTSTATUS(START)")
+        logger.info("PC", "TESTSTATUS(START)")
         while not end:
             # Get string input from terminal
             input_str = input("[PC] >> ")
@@ -66,18 +66,19 @@ def CLI_handler(condition: str):
             command_args = command.parse()
 
             # Log received command to log file
-            logger.info(f"[PC] {command_args[0]}({command_args[1]})")
+            logger.info("PC", f"{command_args[0]}({command_args[1]})")
 
             # Append command to queue
             match command_args:
                 case ('TESTSTATUS', 'START'):
-                    logger.error("Can't start new TEST, one is already running") 
+                    logger.error("VB", "Can't start new TEST"
+                                 "one is already running") 
                 case ('TESTSTATUS', 'END'):
                     end = True
                 case _:
                     with mutex:
                         if len(cmd_queue) > 0:
-                            logger.info("[VB] Command in queue")
+                            logger.info("VB", "Command in queue")
                         cmd_queue.append(command_args)
     else:
         # TESTSTATUS(END) was called before starting a TEST
@@ -129,7 +130,7 @@ def is_CLI_args_valid(args):
                 valid = True
                 match_PS_cmdPrompt_formats()
             else:
-                logger.error(f"Error: Unknown argument {args[3]}")
+                logger.error("VB", f"Unknown argument {args[3]}")
         case 3:
             valid = True
             # 3rd argument could be Debug flag on cmd_prompt or command ran in powershell
@@ -139,7 +140,7 @@ def is_CLI_args_valid(args):
             valid = True
         case _:
             print(f"Error: Provide argument in the form COMMAND(ARG)")
-            logger.error(f"Error: Argument is not in the form COMMAND(ARG)")
+            logger.error("VB", f"Argument is not in the form COMMAND(ARG)")
     return valid
 # END is_CLI_args_valid()
             

@@ -5,11 +5,32 @@ import matplotlib.pyplot as plt
 from typing import List, Tuple
 from crop_screen import StraightenAndCrop
 from find_text import find_all_words
+from vbox_logger import logger
+import constants as cnst
 
 # Box type (x, y, w, h) where (x,y) is Top-Left and (w,h) are width and height
 box_t = Tuple[int, int, int, int]
 
-################### HELPER FUNCTIONS #####################
+LOG_TAG = 'COMPIMAGE'
+
+############################### HELPER FUNCTIONS ##############################
+def capture_cam_frame():
+    """ Captures a frame from camer """
+    # Load image
+    frame = cv2.imread('Testing/screens_vbox_cam/T03_vbox_cam.png')
+
+    cap = cv2.VideoCapture(cnst.DEFAULT_CAM_PORT - 1)
+    if cap.isOpened():
+        #ret, frame = cap.read()
+        cap.release()
+    
+    if frame is None:
+        logger.warning("VB", "Could not capture image on camera", tag=LOG_TAG)
+
+    # Rotate frame as camera is facing backwards
+    frame = cv2.rotate(frame, cv2.ROTATE_180)
+    return frame
+
 def img_show(img_list: List[cv2.Mat]):
     """ Shows a list of images """
     if len(img_list) == 1:
@@ -103,6 +124,7 @@ def CompareText(sample_img: cv2.Mat, ref_path: str) -> float:
                 break
         
     text_sim = matches/union_length
+    logger.debug("VB", f"Image text similarity: {text_sim}", tag=LOG_TAG)
     return text_sim
     
 def CompareIoU(sample_img: cv2.Mat, ref_img: cv2.Mat) -> float:
@@ -119,27 +141,42 @@ def CompareIoU(sample_img: cv2.Mat, ref_img: cv2.Mat) -> float:
     boxes_ref = [cv2.boundingRect(cnt) for cnt in contours_ref]
     
     # Calculate similarity
-    return img_getSimilarity(boxes_sample, boxes_ref)
+    sim = img_getSimilarity(boxes_sample, boxes_ref)
+    logger.debug("VB", f"Structural similarity: {round(sim, 2)}", tag=LOG_TAG)
+    return sim
 
-def CompareImage(sample_path: str, ref_path: str) -> float:
+def CompareImage(ref_path: str) -> float:
     # Read images
-    sample_img = cv2.imread(sample_path)
-    ref_img = cv2.imread(ref_path)
-    assert sample_img is not None, "Sample Image could not be read"
-    assert ref_img is not None, "Reference Image could not be read"
+    sample_img = capture_cam_frame()
+    if sample_img is None:
+        return
+    try:
+        ref_img = cv2.imread(ref_path)
+    except:
+        logger.warning("VB", "Could not read image from provided path", tag=LOG_TAG)
+        return
 
     # First crop sample_img to show only screen of device
     sample_img = StraightenAndCrop(sample_img, ref_img.shape[1], ref_img.shape[0])
     # Compute comparison metrics
     iou_sim = CompareIoU(sample_img, ref_img)
+    if iou_sim < cnst.CIMG_IOU_MATCH_THRESHOLD:
+        logger.info("VB", "Status: FAIL", tag=LOG_TAG)
+        return False
+    
     text_sim = CompareText(sample_img, ref_path)
-
-    if text_sim < 0.9:
-       return 0
-    return iou_sim
+    if text_sim < cnst.CIMG_TEXT_MATCH_THRESHOLD:
+        logger.info("VB", "Status: FAIL", tag=LOG_TAG)
+        return False
+    
+    # If execution got here, test is PASSED
+    logger.info("VB", "Status: PASS", tag=LOG_TAG)
+    return True
  
 if __name__ == '__main__':
-    sample = 'Testing/screens_cam18/T07_cam_18.png'
-    ref = 'Testing/screens/T07.png'
-    sim = CompareImage(sample, ref)
+    logger.enable_debug_level()
+    logger.preamble_log()
+
+    ref = 'Testing/screens/T03.png'
+    sim = CompareImage(ref)
     print(sim)

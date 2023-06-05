@@ -36,24 +36,22 @@ class VBOX_logger:
     def enable_debug_level(self):
         self.debug_flag = True
 
-    def info(self, msg):
-        msg = f"{self.curr_line_num} {msg}"
+    def info(self, who, msg, tag=""):
+        msg = f"{self.curr_line_num} [{who}] {tag} {msg}"
         self.logger.info(msg)
         self.curr_line_num += 1
 
-    def debug(self, msg):
+    def debug(self, who, msg, tag=""):
         if self.debug_flag:
-            msg = f"{self.curr_line_num} {msg}"
-            self.logger.info(msg)
-            self.curr_line_num += 1
+            self.info(who, msg, tag)
 
-    def warning(self, msg):
-        msg = f"{self.curr_line_num} {msg}"
+    def warning(self, who, msg, tag=""):
+        msg = f"{self.curr_line_num} [{who}] {tag} WARNING: {msg}"
         self.logger.warning(msg)
         self.curr_line_num += 1
 
-    def error(self, msg):
-        msg = f"{self.curr_line_num} {msg}"
+    def error(self, who, msg, tag=""):
+        msg = f"{self.curr_line_num} [{who}] {tag} ERROR: {msg}"
         self.logger.error(msg)
         self.curr_line_num += 1
 
