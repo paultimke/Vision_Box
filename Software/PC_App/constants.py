@@ -2,8 +2,8 @@
 
 ###### General program constants
 DEFAULT_CAM_PORT = 1                  # Default USB port for camera
-CONFIG_FILE_NAME = "config.json"
-CLI_DEBUG_FLAG_NAME = '-verbose'
+CONFIG_FILE_NAME = "config.json"      # File name for configuration
+CLI_DEBUG_FLAG_NAME = '-verbose'      # CLI argument name to trigger verbose output
 
 ###### FIND OBJECT constants
 FOBJ_GRAY_THRESHOLD = 100             # Threshold for input image grayscale (0 - 255)
@@ -13,3 +13,6 @@ FOBJ_MATCH_THRESHOLD = 95             # Acceptance threshold for matching templa
 FOBJ_ACCEPTANCE_DIFF = 30             # Acceptance difference between found objects
 FOBJ_MT_ITERATIONS = 100              # Iterations to apply Match template algorithm
 
+##### COMPARE IMAGE constants
+CIMG_IOU_MATCH_THRESHOLD = 0.8
+CIMG_TEXT_MATCH_THRESHOLD = 0.9
