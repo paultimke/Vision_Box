@@ -75,6 +75,8 @@ def CLI_handler(condition: str):
                                  "one is already running") 
                 case ('TESTSTATUS', 'END'):
                     end = True
+                case (None, None):
+                    logger.error("VB", f"Innvalid syntax: {input_str}")
                 case _:
                     with mutex:
                         if len(cmd_queue) > 0:
@@ -89,7 +91,7 @@ def process_command(cmd=None, arg=None):
     """ Thread to handle command processing. It takes commands\
         out of the common cmd_queue """
     def execute_command(cmd, arg):
-        print(f"[VB] >> ACK {cmd}({arg})")
+        #print(f"[VB] >> ACK {cmd}({arg})")
         cmd_lookup_table[cmd](arg)
             
     # Commands were given directly and no concurrency is happening
