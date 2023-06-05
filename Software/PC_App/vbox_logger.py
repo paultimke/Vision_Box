@@ -37,7 +37,10 @@ class VBOX_logger:
         self.debug_flag = True
 
     def info(self, who, msg, tag=""):
-        msg = f"{self.curr_line_num} [{who}] {tag} {msg}"
+        if tag == "":
+            msg = f"{self.curr_line_num} [{who}] {tag} {msg}"
+        else:
+            msg = f"{self.curr_line_num} [{who}]  {tag} {msg}" 
         self.logger.info(msg)
         self.curr_line_num += 1
 
