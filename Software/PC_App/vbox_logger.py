@@ -8,7 +8,7 @@ class VBOX_logger:
     """ Wrapper around python's logging module to add specific features like\
         line number counting """
     
-    def __init__(self, filename='vbox.log'):
+    def __init__(self, filename=cnst.DEFAULT_LOG_FILE_NAME):
         self.curr_line_num = 0
         self.debug_flag = False
         self.logger = logging.getLogger('vbox')

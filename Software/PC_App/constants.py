@@ -7,8 +7,9 @@ SW_VERSION_REV = 0
 SOFTWARE_VERSION = f"{SW_VERSION_MAJOR}.{SW_VERSION_MINOR}.{SW_VERSION_REV}"
 
 DEFAULT_CAM_PORT = 1                  # Default USB port for camera
+DEFAULT_LOG_FILE_NAME = "vbox.log"    # Default file name for log
 CONFIG_FILE_NAME = "config.json"      # File name for configuration
-CLI_DEBUG_FLAG_NAME = '-verbose'      # CLI argument name to trigger verbose output
+CLI_DEBUG_FLAG_NAME = "-verbose"      # CLI argument name to trigger verbose output
 
 ###### FIND OBJECT constants
 FOBJ_GRAY_THRESHOLD = 100             # Threshold for input image grayscale (0 - 255)
