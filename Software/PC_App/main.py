@@ -1,5 +1,6 @@
 import threading
 import sys
+import os
 import time
 import takeFunction as parser
 import constants as cnst
@@ -33,9 +34,13 @@ def main():
         command_args = command.parse()
         if sys.argv[-1] == cnst.CLI_DEBUG_FLAG_NAME:
             logger.enable_debug_level()
-        logger.preamble_log()
+        
+        # Do not generate log file on HELP or EXAMPLE commands
+        if command_args[0] != 'HELPME' and command_args[0] != 'EXAMPLE':
+            logger.preamble_log()
+        else:
+            os.remove(cnst.DEFAULT_LOG_FILE_NAME)
     else:
-        print("Must specify one command to run")
         exit()
 
     # Call corresponding command
@@ -47,6 +52,9 @@ def main():
             cli.start()
             cmd_server.start()
             cli.join()
+        case (None, None):
+            logger.error("VB", "Command call Syntax Error")
+            return
         case (cmd, arg):
             process_command(cmd, arg)
         case _:
@@ -134,10 +142,14 @@ def is_CLI_args_valid(args):
             else:
                 logger.error("VB", f"Unknown argument {args[3]}")
         case 3:
-            valid = True
             # 3rd argument could be Debug flag on cmd_prompt or command ran in powershell
+            valid = True
+            unknown_arg = args[2]
             if args[2] != cnst.CLI_DEBUG_FLAG_NAME:
                 match_PS_cmdPrompt_formats()
+            if args[0][:4] == args[1][:4]:
+                valid = False
+                print(f"Error: Unknown argument {unknown_arg}")
         case 2:
             valid = True
         case _:
