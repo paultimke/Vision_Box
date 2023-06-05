@@ -44,7 +44,7 @@ class VBOX_logger:
     def debug(self, msg):
         if self.debug_flag:
             msg = f"{self.curr_line_num} {msg}"
-            self.logger.debug(msg)
+            self.logger.info(msg)
             self.curr_line_num += 1
 
     def warning(self, msg):
