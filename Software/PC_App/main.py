@@ -7,6 +7,7 @@ import find_object as fOBJ
 from comp_img import CompareImage
 from detect_text import find_text
 from set_light import Set_light
+from help import help_cmd, example_cmd
 from vbox_logger import logger
 
 ############################### Global variables ##############################
@@ -19,8 +20,8 @@ cmd_lookup_table = {
     'FTEXT': find_text,
     'COMPIMAGE': CompareImage,
     'SETLIGHT': Set_light,
-    'HELPME': None,   #TODO
-    'EXAMPLE': None   #TODO
+    'HELPME': help_cmd,
+    'EXAMPLE': example_cmd
 }
 
 ########################### Main Program Functions ############################
@@ -47,11 +48,9 @@ def main():
             cmd_server.start()
             cli.join()
         case (cmd, arg):
-            print(f"Processing command {cmd}({arg})")
             process_command(cmd, arg)
         case _:
-            print("Unknown Error")
-            pass
+            logger.error("ERROR: Unknown Error")
 # END main()
 
 def CLI_handler(condition: str):
@@ -129,8 +128,7 @@ def is_CLI_args_valid(args):
                 valid = True
                 match_PS_cmdPrompt_formats()
             else:
-                # TODO: Log error to log file
-                print(f"Error: Unknown argument {args[3]}")
+                logger.error(f"Error: Unknown argument {args[3]}")
         case 3:
             valid = True
             # 3rd argument could be Debug flag on cmd_prompt or command ran in powershell
@@ -139,8 +137,8 @@ def is_CLI_args_valid(args):
         case 2:
             valid = True
         case _:
-            # TODO: Log error to log file
             print(f"Error: Provide argument in the form COMMAND(ARG)")
+            logger.error(f"Error: Argument is not in the form COMMAND(ARG)")
     return valid
 # END is_CLI_args_valid()
             
