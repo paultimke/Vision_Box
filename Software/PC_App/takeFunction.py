@@ -15,7 +15,7 @@ class callFunction:
     def check(self) -> bool:
         """ Check if function object is correctly created """
         check = False 
-        if self.__Status.match(self.name) or self.__findText.match(self.name) or self.__findImage.match(self.name) or self.__findIcon.match(self.name):
+        if self.__Status.match(self.name) or self.__findText.match(self.name) or self.__findImage.match(self.name) or self.__findIcon.match(self.name) or self.__setLight.match(self.name) or self.__helpMe.match(self.name) or self.__Example.match(self.name):
             check = True
         return check
     

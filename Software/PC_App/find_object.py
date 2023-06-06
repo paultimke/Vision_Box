@@ -7,34 +7,9 @@ import matplotlib.pyplot as plt
 import imutils 
 import logging
 import constants as cnst
+from vbox_logger import logger
 
-#----------------Create and configure logger----------------# 
-def logger_init():
-    """ Initialice logging message handler to create .log file """
-    logging.basicConfig(filename="find_object.log", 
-                        encoding='utf-8', 
-                        filemode="w") 
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    fh = logging.StreamHandler()
-    fh_formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s')
-    fh.setFormatter(fh_formatter)
-    logger.addHandler(fh)
-    return logger
-
-
-def inputIMG_init(cam_port: str):
-    """ Read input image """
-    if cam_port == "0" or cam_port == "1" or cam_port == "2" or cam_port == "3" or cam_port == "4":
-        cam = cv2.VideoCapture(cam_port)
-        _,input_image = cam.read() 
-        cv2.waitKey(1)       
-        cam.release()
-    else:
-        input_image = cv2.imread(cam_port)
-        assert input_image is not None, "Failed to take picture, check camera port"
-    return input_image
-
+LOG_TAG= 'FICON'
 
 def visualize(img, title:str, figure:int):
     """ Use Matplotlib to show image """
@@ -122,7 +97,7 @@ def matchTemplate(input_img, template):
     return foundList
 
 
-def findObjects(foundList, template, display_image):
+def findObjects(foundList, template, display_image, rating_diff):
     """ Iterate in list of matched objetcs and filter by correlation value and position """
     
     found_treshold = cnst.FOBJ_MATCH_THRESHOLD
@@ -182,7 +157,7 @@ def findObjects(foundList, template, display_image):
     if len(max_correlated_values)!=0:
         for i in max_correlated_list:
             rating = i[4]/(max(max_correlated_values)/100)
-            if rating > 85:
+            if rating > rating_diff:
                 # save result and draw a bounding box around passed image
                 cv2.rectangle(display_image, (i[0], i[2]), (i[1], i[3]), (255, 0, 0), 2)
                 detected_temp = [i[0], i[1], i[2], i[3], i[4]]
@@ -245,31 +220,30 @@ def show_image_list(list_images, list_titles=None, list_cmaps=None, grid=True, n
 
 #--------------------------------------MAIN FUNCTION-------------------------------------------#
 
-def mainly(cam_port, template_path, debg):  
+def mainly(template_path, raw_input_image):  
     min_contour_area = 300   # Minimun contour area to search screen (pixels)
     margin_cut = 10          # Margin to cut screen edges (pixels)
+    rating_diff = 90
 
-    logger = logger_init()
-    raw_input_image = inputIMG_init(cam_port)
     raw_template = template_init(template_path)
 
     inputIMG = inputIMG_process(raw_input_image, min_contour_area, margin_cut)
     template = template_process(raw_template)  
 
     foundList = matchTemplate(inputIMG, template)
-    detected_list, detected_objs, display_image, rejected_list, rejected_objects, failed_image = findObjects(foundList, template, inputIMG)
+    detected_list, detected_objs, display_image, rejected_list, rejected_objects, failed_image = findObjects(foundList, template, inputIMG, rating_diff)
     
-    if debg:
+    """ if debg:
         list_images = [raw_template, raw_input_image, template, inputIMG]
         show_image_list(list_images, 
                 list_titles=['Raw template', 'Raw image', 'Processed Template', 'Processed image'],
                 figsize=(5,5),
                 grid=False,
                 title_fontsize=8)
-        cnt = 1
-        for i in range(0,rejected_objects): ###
-            logger.debug("Failed object %d coords: X(%d,%d) Y(%d,%d)    Correlation: %d", i+1, 
-                        rejected_list[i][0], rejected_list[i][1], rejected_list[i][2], rejected_list[i][3], rejected_list[i][4])
+        cnt = 1 """
+    for i in range(0,rejected_objects): ###
+        logger.debug("VB", "Failed object %d coords: X(%d,%d) Y(%d,%d)    Correlation: %d", i+1, 
+                    rejected_list[i][0], rejected_list[i][1], rejected_list[i][2], rejected_list[i][3], rejected_list[i][4], tag=LOG_TAG)
                
     if detected_objs != 0:
         logger.info("PASSED")
@@ -277,8 +251,9 @@ def mainly(cam_port, template_path, debg):
         for i in range(0,detected_objs):
             logger.info("Passed object %d coords: X(%d,%d) Y(%d,%d)    Correlation: %d", i+1, 
                         detected_list[i][0], detected_list[i][1], detected_list[i][2], detected_list[i][3], detected_list[i][4])   
-        if debg:
-            visualize(failed_image, "Failed IMG. Objects found (red square)", 3) 
+        """ if debg:
+            visualize(display_image, "Objects found (red square)", 1)
+            visualize(failed_image, "Failed IMG. Objects found (red square)", 3)  """
 
     else:
         logger.warning("FAILED")
@@ -293,7 +268,7 @@ def mainly(cam_port, template_path, debg):
             logger.info("Failed matching object correlation %d: %d", cnt, acceptance) 
             cnt+=1
 
-    plt.show()
+    #plt.show()
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
