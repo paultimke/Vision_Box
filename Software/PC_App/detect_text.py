@@ -137,7 +137,7 @@ def find_text(user_text, img )-> list:
     img= cv2.rotate(img, cv2.ROTATE_180)
     #plt.imshow(img)
     img= crop_screen.StraightenAndCrop(img, x, y)
-    #user_text='22.0'
+    #user_text='o'
     
 
     try :
@@ -172,9 +172,9 @@ def find_text(user_text, img )-> list:
     #show_images(found_text, img, img1, img2)
 
     times=len(found_text)
-    logger.info("VB", f"Number of times the text {user_text} was found: {times}", tag=LOG_TAG)
+    logger.info("VB", f"Number of times the text '{user_text}' was found: {times}", tag=LOG_TAG)
     for i in range(times):
-        logger.info("VB", f"Postion {i}: x: {found_text[i][1]} px, y:{found_text[i][2]+found_text[i][4]} px", tag=LOG_TAG)
+        logger.info("VB", f"Postion {i+1}: x: {found_text[i][1]} px, y:{found_text[i][2]+found_text[i][4]} px", tag=LOG_TAG)
 
     return l_lines
 
