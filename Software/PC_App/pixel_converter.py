@@ -1,7 +1,6 @@
 import cv2
 import constants as cnst
 import imutils
-import cv2
 
 def take_pic(cam_port):
     """ Read input image """
