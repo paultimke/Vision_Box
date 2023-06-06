@@ -48,8 +48,8 @@ def main():
     match command_args:
         case ('TESTSTATUS', condition):
             # Start CLI and command-servicing threads
-            cli = threading.Thread(target=CLI_handler, args=(condition, ))
-            cmd_server = threading.Thread(target=process_command, daemon=True)
+            cli = threading.Thread(target=CLI_handler, args=(condition, ), daemon=True)
+            cmd_server = threading.Thread(target=process_command, daemon=False)
             cli.start()
             cmd_server.start()
             cli.join()
@@ -84,6 +84,11 @@ def CLI_handler(condition: str):
                                  "one is already running") 
                 case ('TESTSTATUS', 'END'):
                     end = True
+                    with mutex:
+                        if len(cmd_queue) > 0:
+                            logger.info("VB", "Command in queue")
+                        print("Waiting on commands to finish processing...")
+                        cmd_queue.append(command_args)
                 case (None, None):
                     logger.error("VB", f"Innvalid syntax: {input_str}")
                 case _:
@@ -100,8 +105,9 @@ def process_command(cmd=None, arg=None):
     """ Thread to handle command processing. It takes commands\
         out of the common cmd_queue """
     def execute_command(cmd, arg):
-        #print(f"[VB] >> ACK {cmd}({arg})")
+        print(f"[VB] >> ACK")
         cmd_lookup_table[cmd](arg)
+
             
     # Commands were given directly and no concurrency is happening
     if (cmd, arg) != (None, None):
@@ -118,7 +124,10 @@ def process_command(cmd=None, arg=None):
         
         if commands_pending:
             commands_pending = False
-            execute_command(cmd, arg)
+            if (cmd, arg) == ('TESTSTATUS', 'END'):
+                break
+            else:
+                execute_command(cmd, arg)
 # END process_command()
             
 
@@ -133,6 +142,7 @@ def is_CLI_args_valid(args):
         sys.argv.clear()
         sys.argv.append(command)
         sys.argv.append(f"{command}({command_arg})")
+
 
     match(len(args)):
         case 4:
