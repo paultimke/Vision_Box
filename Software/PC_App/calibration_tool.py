@@ -1,3 +1,5 @@
+import os
+os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 import cv2
 import numpy as np
 import json
@@ -32,8 +34,8 @@ def write_corners_json(corners: List[corner_t]) -> None:
 def capture_frame(cam_obj) -> cv2.Mat:
     """ Captures live camera frame """
     #Load the image
-    frame = cv2.imread('Testing/screens_vbox_cam/T03_vbox_cam.png')
-    #ret, frame = cam_obj.read()
+    #frame = cv2.imread('Testing/screens_vbox_cam/T03_vbox_cam.png')
+    ret, frame = cam_obj.read()
     frame = cv2.rotate(frame, cv2.ROTATE_180)
     return frame
 
