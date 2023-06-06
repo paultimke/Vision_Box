@@ -6,6 +6,9 @@ Software/Illumination_FW/sdkconfig.old
 Software/Illumination_FW/.devcontainer
 Software/Illumination_FW/dependencies.lock
 
+# Configuration file
+config.json
+
 # MacOs specific files
 *.DS_Store
 
