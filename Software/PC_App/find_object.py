@@ -8,6 +8,7 @@ import imutils
 import logging
 import constants as cnst
 from vbox_logger import logger
+import crop_screen as cs
 
 LOG_TAG= 'FICON'
 
@@ -25,30 +26,26 @@ def template_init(template_path):
     return template
 
 
-def inputIMG_process(input_image, min_contour_area, margin_cut):
+def inputIMG_process(input_image: cv2.Mat) -> cv2.Mat:
     """ Binarize input image, find screen contour and crop image,
         then resize to standard MACRO defeined size""" 
-    
-    img_threshold = cnst.FOBJ_GRAY_THRESHOLD
+    x, y, j = input_image.shape
+    croppy = cs.StraightenAndCrop(input_image, x, y)
+    cut_x, cut_y, j = croppy.shape
+
     (xsize, ysize) = cnst.FOBJ_RESIZE_INPUT_STD
+    kernel = np.ones((1,1), np.uint8)
 
-    gray_input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
-    _, img_thresh = cv2.threshold(gray_input_image, img_threshold, 255, cv2.THRESH_BINARY)
+    gray_input_image = cv2.cvtColor(croppy, cv2.COLOR_BGR2GRAY)
+    img_thresh = cv2.adaptiveThreshold(gray_input_image,255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 105, 5)
+    img_erode = cv2.dilate(img_thresh, kernel, iterations=15)
 
-    # Find screen contours and crop input image
-    Contours,_ = cv2.findContours(img_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    for contour in Contours:
-        if cv2.contourArea(contour) > min_contour_area:
-            [X, Y, W, H] = cv2.boundingRect(contour)   
-    gray_cropped_input_image = gray_input_image[Y+margin_cut : Y+H-margin_cut, X+margin_cut : X+W-margin_cut]
-
-    (tH, tW) = gray_cropped_input_image.shape[:2]
+    (tH, tW) = img_erode.shape[:2]
     aspect_ratio = tH/tW
 
     # Resize input image
-    cropped_input_image = cv2.resize(gray_cropped_input_image, (xsize, round(xsize*aspect_ratio)))
-    _, binary_cropped_input_image = cv2.threshold(cropped_input_image, 150, 255, cv2.THRESH_BINARY)
-    return binary_cropped_input_image
+    cropped_input_image = cv2.resize(img_erode, (xsize, round(xsize*aspect_ratio)))
+    return cropped_input_image, cut_x, cut_y
 
 
 def template_process(template):
@@ -216,57 +213,34 @@ def show_image_list(list_images, list_titles=None, list_cmaps=None, grid=True, n
     #_ = plt.show()
 
 
-
 #--------------------------------------MAIN FUNCTION-------------------------------------------#
 
 def mainly(template_path, raw_input_image):  
-    min_contour_area = 300   # Minimun contour area to search screen (pixels)
-    margin_cut = 10          # Margin to cut screen edges (pixels)
     rating_diff = 90
 
     raw_template = template_init(template_path)
 
-    inputIMG = inputIMG_process(raw_input_image, min_contour_area, margin_cut)
+    inputIMG, cut_x, cut_y = inputIMG_process(raw_input_image)
     template = template_process(raw_template)  
 
     foundList = matchTemplate(inputIMG, template)
     detected_list, detected_objs, display_image, rejected_list, rejected_objects, failed_image = findObjects(foundList, template, inputIMG, rating_diff)
     
-    """ if debg:
-        list_images = [raw_template, raw_input_image, template, inputIMG]
-        show_image_list(list_images, 
-                list_titles=['Raw template', 'Raw image', 'Processed Template', 'Processed image'],
-                figsize=(5,5),
-                grid=False,
-                title_fontsize=8)
-        cnt = 1 """
-    for i in range(0,rejected_objects): ###
-        logger.debug("VB", f"Failed object {i+1} coords: X({rejected_list[i][0]},{rejected_list[i][1]}) Y({rejected_list[i][2]},{rejected_list[i][3]})    Correlation: {rejected_list[i][4]}", tag= LOG_TAG)
+    #for i in range(0,rejected_objects): ###
+        #logger.debug("VB", f"Failed object {i+1} coords: X({rejected_list[i][0]},{rejected_list[i][1]}) Y({rejected_list[i][2]},{rejected_list[i][3]})    Correlation: {rejected_list[i][4]}", tag= LOG_TAG)
 
     if detected_objs != 0:
         logger.info("VB", f"PASSED", tag=LOG_TAG)
         logger.info("VB", f"Number of objects detected: {detected_objs}", tag=LOG_TAG)
         for i in range(0,detected_objs):
-            logger.info("VB", f"Passed object {i+1} coords: X({detected_list[i][0]},{detected_list[i][1]}) Y({detected_list[i][2]},{detected_list[i][3]})    Correlation: {detected_list[i][4]}", tag=LOG_TAG)
-
-        """ if debg:
-            visualize(display_image, "Objects found (red square)", 1)
-            visualize(failed_image, "Failed IMG. Objects found (red square)", 3)  """
+            logger.info("VB", f"Passed object {i+1} coords: X({(detected_list[i][0])*(cut_x/cnst.FOBJ_RESIZE_INPUT_STD)},{(detected_list[i][1])*(cut_x/cnst.FOBJ_RESIZE_INPUT_STD)}) Y({(detected_list[i][2])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD)},{(detected_list[i][3])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD)})    Correlation: {detected_list[i][4]}", tag=LOG_TAG)
 
     else:
         logger.warning("VB", f"FAILED", tag=LOG_TAG)
-        cnt = 1
-        for i in foundList:
-            (tH, tW) = template.shape[:2]
-            (startX, startY) = (int(i[1][0] * i[2]), int(i[1][1] * i[2]))
-            (endX, endY) = (int((i[1][0] + tW) * i[2]), int((i[1][1] + tH) * i[2]))
-            # draw a bounding box around failed image
-            cv2.rectangle(failed_image, (startX, startY), (endX, endY), (255, 0, 0), 2)
-            acceptance = i[0]
-            logger.info("VB", f"Failed matching object correlation {cnt}: {acceptance}", tag=LOG_TAG) 
-            cnt+=1
 
-    #plt.show()
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    try:
+        cv2.imwrite('buena.png', display_image)
+        print('si')
+    except:
+        cv2.imwrite('mala.png', failed_image)
 

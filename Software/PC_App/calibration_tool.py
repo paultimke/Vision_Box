@@ -70,7 +70,7 @@ def draw_help_text(frame, n_saved_points):
 
 def main():
     # load the image, rotate it to face forwards and clone it
-    vid = cv2.VideoCapture(0)
+    vid = cv2.VideoCapture(int(cnst.DEFAULT_CAM_PORT))
     image = capture_frame(vid)
     clone = image.copy()
 
