@@ -4,6 +4,10 @@ import constants as cnst
 def _configure_logger():
     return VBOX_logger()
 
+def immage_logger(cmd_name: str, img_list):
+    pass
+
+
 class VBOX_logger:
     """ Wrapper around python's logging module to add specific features like\
         line number counting """
