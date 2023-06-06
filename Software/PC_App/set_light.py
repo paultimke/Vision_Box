@@ -91,7 +91,7 @@ class light_controller:
                 valid = True
         return valid
 
-def Set_light(luxes):
+def Set_light(luxes, _):
     light_control = light_controller()
     light_control.set_brightness(luxes)
     light_control.detach()
