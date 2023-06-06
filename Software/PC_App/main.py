@@ -2,6 +2,7 @@ import threading
 import sys
 import os
 import time
+import cv2
 import takeFunction as parser
 import constants as cnst
 import find_object as fOBJ
@@ -73,6 +74,9 @@ def CLI_handler(condition: str):
             input_str = input("[PC] >> ")
             command = parser.callFunction(input_str)
             command_args = command.parse()
+            raw_input_image = inputIMG_init(cnst.DEFAULT_CAM_PORT)
+            queue_params = (command_args, raw_input_image)
+
 
             # Log received command to log file
             logger.info("PC", f"{command_args[0]}({command_args[1]})")
@@ -88,14 +92,14 @@ def CLI_handler(condition: str):
                         if len(cmd_queue) > 0:
                             logger.info("VB", "Command in queue")
                         print("Waiting on commands to finish processing...")
-                        cmd_queue.append(command_args)
+                        cmd_queue.append(queue_params)
                 case (None, None):
                     logger.error("VB", f"Innvalid syntax: {input_str}")
                 case _:
                     with mutex:
                         if len(cmd_queue) > 0:
                             logger.info("VB", "Command in queue")
-                        cmd_queue.append(command_args)
+                        cmd_queue.append(queue_params)
     else:
         # TESTSTATUS(END) was called before starting a TEST
         logger.error("Can not end a not started TESTSTATUS")
@@ -104,14 +108,15 @@ def CLI_handler(condition: str):
 def process_command(cmd=None, arg=None):
     """ Thread to handle command processing. It takes commands\
         out of the common cmd_queue """
-    def execute_command(cmd, arg):
+    def execute_command(cmd, arg, raw_im):
         print(f"[VB] >> ACK")
-        cmd_lookup_table[cmd](arg)
+        cmd_lookup_table[cmd](arg, raw_im)
 
             
     # Commands were given directly and no concurrency is happening
     if (cmd, arg) != (None, None):
-        execute_command(cmd, arg)
+        raw_input_image = inputIMG_init(cam_port=cnst.DEFAULT_CAM_PORT)
+        execute_command(cmd, arg, raw_input_image)
         return
 
     # TESTSTATUS was started, and cmd_queue is being filled by other thread
@@ -119,7 +124,7 @@ def process_command(cmd=None, arg=None):
     while True:
         with mutex:
             if len(cmd_queue) > 0:
-                (cmd, arg) = cmd_queue.pop(0)
+                ((cmd, arg), raw_input_image) = cmd_queue.pop(0)
                 commands_pending = True
         
         if commands_pending:
@@ -127,7 +132,7 @@ def process_command(cmd=None, arg=None):
             if (cmd, arg) == ('TESTSTATUS', 'END'):
                 break
             else:
-                execute_command(cmd, arg)
+                execute_command(cmd, arg, raw_input_image)
 # END process_command()
             
 
@@ -168,6 +173,19 @@ def is_CLI_args_valid(args):
             logger.error("VB", f"Argument is not in the form COMMAND(ARG)")
     return valid
 # END is_CLI_args_valid()
+
+def inputIMG_init(cam_port: str):
+    """ Read input image """
+    if cam_port == "0" or cam_port == "1" or cam_port == "2" or cam_port == "3" or cam_port == "4":
+        cam = cv2.VideoCapture(cam_port)
+        _,input_image = cam.read() 
+        cv2.waitKey(1)       
+        cam.release()
+    else:
+        input_image = cv2.imread(cam_port)
+        assert input_image is not None, "Failed to take picture, check camera port"
+    input_image = cv2.rotate(input_image, rotateCode= cv2.ROTATE_180)
+    return input_image
             
 
 if __name__ == '__main__':
