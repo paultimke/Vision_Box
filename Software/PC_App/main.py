@@ -76,13 +76,13 @@ def CLI_handler(condition: str):
             command = parser.callFunction(input_str)
             command_args = command.parse()
 
-            # Take image and build tuple to add to queue
-            raw_input_image = inputIMG_init(cnst.DEFAULT_CAM_PORT)
-            queue_params = (command_args, raw_input_image)
-
             # Log received command to log file
             logger.info("PC", f"{command_args[0]}({command_args[1]})")
             print(f"[VB] >> ACK {command_args[0]}({command_args[1]})")
+
+            # Take image and build tuple to add to queue
+            raw_input_image = inputIMG_init(cnst.DEFAULT_CAM_PORT)
+            queue_params = (command_args, raw_input_image)
 
             # Append command to queue
             match command_args:
@@ -117,7 +117,10 @@ def process_command(cmd=None, arg=None):
             
     # Commands were given directly and no concurrency is happening
     if (cmd, arg) != (None, None):
-        raw_input_image = inputIMG_init(cam_port=cnst.DEFAULT_CAM_PORT)
+        if cmd != 'SETLIGHT' and cmd != 'HELPME' and cmd != 'EXAMPLE':
+            raw_input_image = inputIMG_init(cam_port=cnst.DEFAULT_CAM_PORT)
+        else:
+            raw_input_image = None
         execute_command(cmd, arg, raw_input_image)
         return
 
@@ -180,6 +183,7 @@ def inputIMG_init(cam_port: str):
     """ Read input image """
     if cam_port == "0" or cam_port == "1" or cam_port == "2" or cam_port == "3" or cam_port == "4":
         cam = cv2.VideoCapture(int(cam_port))
+        time.sleep(0.4)
         _,input_image = cam.read() 
         cv2.waitKey(1)       
         cam.release()
