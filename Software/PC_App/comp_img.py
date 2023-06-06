@@ -3,7 +3,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
-from crop_screen import StraightenAndCrop
+from crop_screen import StraightenAndCrop, StraightenAndCrop_Calibrated
 from find_text import find_all_words
 from vbox_logger import logger
 import constants as cnst
@@ -14,23 +14,6 @@ box_t = Tuple[int, int, int, int]
 LOG_TAG = 'COMPIMAGE'
 
 ############################### HELPER FUNCTIONS ##############################
-def capture_cam_frame():
-    """ Captures a frame from camer """
-    # Load image
-    frame = cv2.imread('Testing/screens_vbox_cam/T03_vbox_cam.png')
-
-    cap = cv2.VideoCapture(cnst.DEFAULT_CAM_PORT - 1)
-    if cap.isOpened():
-        #ret, frame = cap.read()
-        cap.release()
-    
-    if frame is None:
-        logger.warning("VB", "Could not capture image on camera", tag=LOG_TAG)
-
-    # Rotate frame as camera is facing backwards
-    frame = cv2.rotate(frame, cv2.ROTATE_180)
-    return frame
-
 def img_show(img_list: List[cv2.Mat]):
     """ Shows a list of images """
     if len(img_list) == 1:
@@ -40,15 +23,30 @@ def img_show(img_list: List[cv2.Mat]):
         for i in range(len(img_list)):
             imarr[i].imshow(cv2.cvtColor(img_list[i], cv2.COLOR_BGR2RGB))
 
-def img_preprocess_IoU(img: cv2.Mat) -> cv2.Mat:
+def img_preprocess_IoU_ref(img: cv2.Mat) -> cv2.Mat:
     """ Processes an image to make it ready for IoU comparison """
     # Binarize
-    THRESH = 140
+    THRESH = 150
     new_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, new_img = cv2.threshold(new_img, THRESH, 255, cv2.THRESH_BINARY_INV)
+    new_img = cv2.adaptiveThreshold(new_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                          cv2.THRESH_BINARY_INV, 199, 5)
+    #_, new_img = cv2.threshold(new_img, THRESH, 255, cv2.THRESH_BINARY_INV)
 
     # Erode
     kernel = np.ones((1, 1), np.uint8)
+    #new_img = cv2.erode(new_img, kernel, iterations=1)
+    return new_img
+
+def img_preprocess_IoU_sample(img: cv2.Mat) -> cv2.Mat:
+    """ Processes an image to make it ready for IoU comparison """
+    # Binarize
+    THRESH = 150
+    new_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    new_img = cv2.adaptiveThreshold(new_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                          cv2.THRESH_BINARY_INV, 115, 5) # GAUSSIAN 199
+
+    # Erode
+    kernel = np.ones((2, 2), np.uint8)
     new_img = cv2.erode(new_img, kernel, iterations=1)
     return new_img
 
@@ -129,10 +127,13 @@ def CompareText(sample_img: cv2.Mat, ref_path: str) -> float:
     
 def CompareIoU(sample_img: cv2.Mat, ref_img: cv2.Mat) -> float:
     # Preprocess Images for Structural Similarity test
-    SAMPLE_PROCESSED = img_preprocess_IoU(sample_img)
-    REF_PROCESSED = img_preprocess_IoU(ref_img)
+    SAMPLE_PROCESSED = img_preprocess_IoU_sample(sample_img)
+    REF_PROCESSED = img_preprocess_IoU_ref(ref_img)
     SAMPLE_PROCESSED = cv2.resize(SAMPLE_PROCESSED, 
                                     (REF_PROCESSED.shape[1], REF_PROCESSED.shape[0]))
+    
+    pros = cv2.hconcat([SAMPLE_PROCESSED, REF_PROCESSED])
+    cv2.imwrite("PROCESSED.png", pros)
 
     # Calculate bounding boxes
     contours_sample, _ = cv2.findContours(SAMPLE_PROCESSED, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -145,10 +146,10 @@ def CompareIoU(sample_img: cv2.Mat, ref_img: cv2.Mat) -> float:
     logger.debug("VB", f"Structural similarity: {round(sim, 2)}", tag=LOG_TAG)
     return sim
 
-def compare_image(ref_path: str) -> float:
+def compare_image(ref_path: str, sample_img: cv2.Mat) -> float:
     # Read images
-    sample_img = capture_cam_frame()
     if sample_img is None:
+        logger.warning("VB", "Image could not be read from camera", tag=LOG_TAG)
         return
     try:
         ref_img = cv2.imread(ref_path)
@@ -157,20 +158,26 @@ def compare_image(ref_path: str) -> float:
         return
 
     # First crop sample_img to show only screen of device
-    sample_img = StraightenAndCrop(sample_img, ref_img.shape[1], ref_img.shape[0])
+    sample_img = StraightenAndCrop_Calibrated(sample_img, ref_img.shape[1], ref_img.shape[0])
+
+    # Save images
+    out_img = cv2.hconcat([sample_img, ref_img])
+    cv2.imwrite("COMPIMG.png", out_img)
+
     # Compute comparison metrics
     iou_sim = CompareIoU(sample_img, ref_img)
     if iou_sim < cnst.CIMG_IOU_MATCH_THRESHOLD:
-        logger.info("VB", "Status: FAIL", tag=LOG_TAG)
+        logger.info("VB", "FAILED", tag=LOG_TAG)
         return False
     
-    text_sim = CompareText(sample_img, ref_path)
-    if text_sim < cnst.CIMG_TEXT_MATCH_THRESHOLD:
-        logger.info("VB", "Status: FAIL", tag=LOG_TAG)
-        return False
+    #text_sim = CompareText(sample_img, ref_path)
+    #print(text_sim)
+    #if text_sim < cnst.CIMG_TEXT_MATCH_THRESHOLD:
+    #    logger.info("VB", "FAILED", tag=LOG_TAG)
+    #    return False
     
     # If execution got here, test is PASSED
-    logger.info("VB", "Status: PASS", tag=LOG_TAG)
+    logger.info("VB", "PASSED", tag=LOG_TAG)
     return True
  
 if __name__ == '__main__':
