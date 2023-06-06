@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from typing import List, Tuple
 from crop_screen import StraightenAndCrop, StraightenAndCrop_Calibrated
 from find_text import find_all_words
-from vbox_logger import logger
+from vbox_logger import logger, img_logger
 import constants as cnst
 
 # Box type (x, y, w, h) where (x,y) is Top-Left and (w,h) are width and height
@@ -132,8 +132,9 @@ def CompareIoU(sample_img: cv2.Mat, ref_img: cv2.Mat) -> float:
     SAMPLE_PROCESSED = cv2.resize(SAMPLE_PROCESSED, 
                                     (REF_PROCESSED.shape[1], REF_PROCESSED.shape[0]))
     
-    pros = cv2.hconcat([SAMPLE_PROCESSED, REF_PROCESSED])
-    cv2.imwrite("PROCESSED.png", pros)
+    #pros = cv2.hconcat([SAMPLE_PROCESSED, REF_PROCESSED])
+    #cv2.imwrite("PROCESSED.png", pros)
+    img_logger.img_save(LOG_TAG, [SAMPLE_PROCESSED, REF_PROCESSED])
 
     # Calculate bounding boxes
     contours_sample, _ = cv2.findContours(SAMPLE_PROCESSED, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -153,6 +154,9 @@ def compare_image(ref_path: str, sample_img: cv2.Mat) -> float:
         return
     try:
         ref_img = cv2.imread(ref_path)
+        if ref_img is None:
+            logger.warning("VB", "Could not read image from provided path", tag=LOG_TAG)
+            return 
     except:
         logger.warning("VB", "Could not read image from provided path", tag=LOG_TAG)
         return
@@ -161,8 +165,7 @@ def compare_image(ref_path: str, sample_img: cv2.Mat) -> float:
     sample_img = StraightenAndCrop_Calibrated(sample_img, ref_img.shape[1], ref_img.shape[0])
 
     # Save images
-    out_img = cv2.hconcat([sample_img, ref_img])
-    cv2.imwrite("COMPIMG.png", out_img)
+    img_logger.img_save(LOG_TAG, [sample_img, ref_img])
 
     # Compute comparison metrics
     iou_sim = CompareIoU(sample_img, ref_img)
