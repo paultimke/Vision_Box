@@ -74,12 +74,14 @@ def CLI_handler(condition: str):
             input_str = input("[PC] >> ")
             command = parser.callFunction(input_str)
             command_args = command.parse()
+
+            # Take image and build tuple to add to queue
             raw_input_image = inputIMG_init(cnst.DEFAULT_CAM_PORT)
             queue_params = (command_args, raw_input_image)
 
-
             # Log received command to log file
             logger.info("PC", f"{command_args[0]}({command_args[1]})")
+            print(f"[VB] >> ACK {command_args[0]}({command_args[1]})")
 
             # Append command to queue
             match command_args:
@@ -109,7 +111,6 @@ def process_command(cmd=None, arg=None):
     """ Thread to handle command processing. It takes commands\
         out of the common cmd_queue """
     def execute_command(cmd, arg, raw_im):
-        print(f"[VB] >> ACK")
         cmd_lookup_table[cmd](arg, raw_im)
 
             
