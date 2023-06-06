@@ -82,7 +82,7 @@ def CLI_handler(condition: str):
 
             # Take image and build tuple to add to queue
             raw_input_image = None
-            if cmd == 'FICON' or cmd == 'FTEXT' or cmd == 'COPMIMAGE':
+            if cmd == 'FICON' or cmd == 'FTEXT' or cmd == 'COMPIMAGE':
                 raw_input_image = inputIMG_init(cnst.DEFAULT_CAM_PORT)
             queue_params = ((cmd, arg), raw_input_image)
 
