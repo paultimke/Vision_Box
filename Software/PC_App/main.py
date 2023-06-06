@@ -1,6 +1,7 @@
+import os
+os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 import threading
 import sys
-import os
 import time
 import cv2
 import takeFunction as parser
@@ -178,7 +179,7 @@ def is_CLI_args_valid(args):
 def inputIMG_init(cam_port: str):
     """ Read input image """
     if cam_port == "0" or cam_port == "1" or cam_port == "2" or cam_port == "3" or cam_port == "4":
-        cam = cv2.VideoCapture(cam_port)
+        cam = cv2.VideoCapture(int(cam_port))
         _,input_image = cam.read() 
         cv2.waitKey(1)       
         cam.release()
