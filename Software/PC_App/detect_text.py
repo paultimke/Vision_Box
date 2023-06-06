@@ -3,6 +3,11 @@ import boto3
 import cv2
 import copy
 import crop_screen
+import find_object
+import matplotlib.pyplot as plt
+from vbox_logger import logger
+
+LOG_TAG='FTEXT'
 
 def init():
     """Initializes AWS client for text rekognition"""
@@ -54,16 +59,18 @@ def get_words_and_mark(responses, img_word, img_line)  :
     for i in(responses['TextDetections']):
         if i['Type'] =='WORD':
             word=i['DetectedText']
+            #box=get_pixelcount(i['Geometry']['BoundingBox'], img_word)
             img_word, box=make_boxes(i['DetectedText'], i['Geometry']['BoundingBox'], img_word)            
             box.insert(0, word)
             l_words.append(tuple(box))
 
         elif i['Type'] =='LINE':
             line=i['DetectedText']
+            #box=get_pixelcount(i['Geometry']['BoundingBox'], img_line)
             img_line, box=make_boxes(i['DetectedText'], i['Geometry']['BoundingBox'], img_line)
             box.insert(0, line)
             l_lines.append(tuple(box))
-    
+    #print('words', l_words)
     return l_lines, img_word, img_line
 
 
@@ -98,9 +105,13 @@ def show_images (found_text, img, img1, img2):
         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.putText(img, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
 
-    cv2.imshow('Word found', img1)
-    cv2.imshow('Line found', img2)
-    cv2.imshow('Text found', img)
+    list_images = [img, img1, img2]
+    find_object.show_image_list(list_images, 
+        list_titles=['matched text', 'words', 'lines'],
+        figsize=(3,3),
+        grid=False,
+        title_fontsize=8)
+    plt.show()
     cv2.waitKey(0)
 
 def different_size_in_line(found_text, user_text, l_lines):
@@ -115,32 +126,57 @@ def different_size_in_line(found_text, user_text, l_lines):
 
     return found_text
 
-def find_text(client, user_text, img )-> list:
-    """"""
+def find_text(user_text, img )-> list:
+    """main function to find text"""
+
+    #photo='Software\PC_App\Testing\screens_vbox_cam\T03_vbox_cam.png'
+    #img = cv2.imread(photo)
+    x, y, c=img.shape
+    #print('size: ' ,img.shape)
+    #plt.imshow(img )
+    img= cv2.rotate(img, cv2.ROTATE_180)
+    #plt.imshow(img)
+    img= crop_screen.StraightenAndCrop(img, x, y)
+    #user_text='o'
+    
+
+    try :
+        client=init()
+        logger.debug("VB", "AWS client correctly initialize", tag=LOG_TAG)
+    except:
+        logger.error("VB", "Could not initialize AWS client", tag=LOG_TAG)
+        found_text=[]
+        return []
+    
     img1=copy.deepcopy(img)
     img2=copy.deepcopy(img)
 
+    
     source_bytes = cv2.imencode('.png', img)[1].tobytes()
-    response= client.detect_text(Image={'Bytes':source_bytes} 
-                                        )
-    #print('response: ', response)
+    try:
+        response= client.detect_text(Image={'Bytes':source_bytes} 
+                                            )
+        logger.debug("VB", "Image correctly sent to AWS client", tag=LOG_TAG)
+    except:
+        logger.error("VB", "Could not send data to AWS client", tag=LOG_TAG)
+        found_text=[]
+        return []
+
+
     l_lines, img1, img2=get_words_and_mark(response, img1,img2)
     found_text=compare_text(user_text, l_lines)
-    
     if len(found_text)==0:
         found_text=different_size_in_line(found_text, user_text, l_lines)
-                    
-    show_images(found_text, img, img1, img2)
+           
+    #Show images
+    #show_images(found_text, img, img1, img2)
 
-    return found_text
+    times=len(found_text)
+    logger.info("VB", f"Number of times the text '{user_text}' was found: {times}", tag=LOG_TAG)
+    for i in range(times):
+        logger.info("VB", f"Postion {i+1}: x: {found_text[i][1]} px, y:{found_text[i][2]+found_text[i][4]} px", tag=LOG_TAG)
+
+    return l_lines
 
     
-
-if __name__ == '__main__':
-    client=init()
-    photo='Software\PC_App\Testing\screens_cam18\T07_cam_18.png'
-    img = cv2.imread(photo)
-    x, y, c=img.shape
-    print('size: ' ,img.shape)
-    img=crop_screen.StraightenAndCrop(img, x, y)
-    print(find_text(client, '22.0', img))
+#print(find_text(1,1))
