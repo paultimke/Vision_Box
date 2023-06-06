@@ -49,7 +49,7 @@ class callFunction:
                 elif (entryTXT.startswith("'") and entryTXT.endswith("'")): 
                     Text = entryTXT.replace("'", '')
                 else: 
-                    print('Error in Function Call. Bad use of quotation marks.') 
+                    Text = entryTXT
 
                 # check if null
                 if len(Text) > 0: 
