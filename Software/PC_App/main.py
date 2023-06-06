@@ -74,18 +74,20 @@ def CLI_handler(condition: str):
             # Get string input from terminal
             input_str = input("[PC] >> ")
             command = parser.callFunction(input_str)
-            command_args = command.parse()
+            (cmd, arg) = command.parse()
 
             # Log received command to log file
-            logger.info("PC", f"{command_args[0]}({command_args[1]})")
-            print(f"[VB] >> ACK {command_args[0]}({command_args[1]})")
+            logger.info("PC", f"{cmd}({arg})")
+            print(f"[VB] >> ACK {cmd}({arg})")
 
             # Take image and build tuple to add to queue
-            raw_input_image = inputIMG_init(cnst.DEFAULT_CAM_PORT)
-            queue_params = (command_args, raw_input_image)
+            raw_input_image = None
+            if cmd == 'FICON' or cmd == 'FTEXT' or cmd == 'COPMIMAGE':
+                raw_input_image = inputIMG_init(cnst.DEFAULT_CAM_PORT)
+            queue_params = ((cmd, arg), raw_input_image)
 
             # Append command to queue
-            match command_args:
+            match (cmd, arg):
                 case ('TESTSTATUS', 'START'):
                     logger.error("VB", "Can't start new TEST"
                                  "one is already running") 
@@ -117,10 +119,9 @@ def process_command(cmd=None, arg=None):
             
     # Commands were given directly and no concurrency is happening
     if (cmd, arg) != (None, None):
-        if cmd != 'SETLIGHT' and cmd != 'HELPME' and cmd != 'EXAMPLE':
+        raw_input_image = None
+        if cmd == 'FICON' and cmd != 'FTEXT' and cmd != 'COMPIMAGE':
             raw_input_image = inputIMG_init(cam_port=cnst.DEFAULT_CAM_PORT)
-        else:
-            raw_input_image = None
         execute_command(cmd, arg, raw_input_image)
         return
 
@@ -180,6 +181,7 @@ def is_CLI_args_valid(args):
 # END is_CLI_args_valid()
 
 def inputIMG_init(cam_port: str):
+    print("Entro aqui")
     """ Read input image """
     if cam_port == "0" or cam_port == "1" or cam_port == "2" or cam_port == "3" or cam_port == "4":
         cam = cv2.VideoCapture(int(cam_port))

@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "args": ["FICON(\"Testing/templates/gota.png\")"],
+            "args": ["TESTSTATUS(START)"],
             "console": "integratedTerminal",
             "justMyCode": true
         }
