@@ -14,7 +14,7 @@ def init():
     
 
     #Reads AWS access keys from csv
-    with open('Software\PC_App\Visionbox_accessKeys.csv','r')as input:
+    with open('Visionbox_accessKeys.csv','r')as input:
         next(input)
         reader=csv.reader(input)
         for line in reader:
@@ -129,15 +129,15 @@ def different_size_in_line(found_text, user_text, l_lines):
 def find_text(user_text, img )-> list:
     """main function to find text"""
 
-    #photo='Software\PC_App\Testing\screens_vbox_cam\T03_vbox_cam.png'
-    #img = cv2.imread(photo)
+    photo='Testing\screens_vbox_cam\T15_vbox_cam.png'
+    img = cv2.imread(photo)
     x, y, c=img.shape
     #print('size: ' ,img.shape)
     #plt.imshow(img )
     img= cv2.rotate(img, cv2.ROTATE_180)
-    #plt.imshow(img)
+    # plt.imshow(img)
     img= crop_screen.StraightenAndCrop(img, x, y)
-    #user_text='o'
+    user_text='o'
     
 
     try :
@@ -169,7 +169,7 @@ def find_text(user_text, img )-> list:
         found_text=different_size_in_line(found_text, user_text, l_lines)
            
     #Show images
-    #show_images(found_text, img, img1, img2)
+    show_images(found_text, img, img1, img2)
 
     times=len(found_text)
     logger.info("VB", f"Number of times the text '{user_text}' was found: {times}", tag=LOG_TAG)
@@ -179,4 +179,4 @@ def find_text(user_text, img )-> list:
     return l_lines
 
     
-#print(find_text(1,1))
+print(find_text(1,1))
