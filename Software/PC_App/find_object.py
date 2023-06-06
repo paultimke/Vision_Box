@@ -118,7 +118,6 @@ def findObjects(foundList, template, display_image, rating_diff):
     failed_image = cv2.cvtColor(display_image, cv2.COLOR_GRAY2BGR)
     display_image = cv2.cvtColor(display_image, cv2.COLOR_GRAY2BGR)
     
-    print(foundList)
     # Loop to find objects
     for i in foundList:
         (startX, startY) = (int(i[1][0] * i[2]), int(i[1][1] * i[2]))
@@ -242,21 +241,20 @@ def mainly(template_path, raw_input_image):
                 title_fontsize=8)
         cnt = 1 """
     for i in range(0,rejected_objects): ###
-        logger.debug("VB", "Failed object %d coords: X(%d,%d) Y(%d,%d)    Correlation: %d", i+1, 
-                    rejected_list[i][0], rejected_list[i][1], rejected_list[i][2], rejected_list[i][3], rejected_list[i][4], tag=LOG_TAG)
-               
+        logger.debug("VB", f"Failed object {i+1} coords: X({rejected_list[i][0]},{rejected_list[i][1]}) Y({rejected_list[i][2]},{rejected_list[i][3]})    Correlation: {rejected_list[i][4]}", tag= LOG_TAG)
+
     if detected_objs != 0:
-        logger.info("PASSED")
-        logger.info("Number of objects detected: %d",detected_objs)
+        logger.info("VB", f"PASSED", tag=LOG_TAG)
+        logger.info("VB", f"Number of objects detected: {detected_objs}", tag=LOG_TAG)
         for i in range(0,detected_objs):
-            logger.info("Passed object %d coords: X(%d,%d) Y(%d,%d)    Correlation: %d", i+1, 
-                        detected_list[i][0], detected_list[i][1], detected_list[i][2], detected_list[i][3], detected_list[i][4])   
+            logger.info("VB", f"Passed object {i+1} coords: X({detected_list[i][0]},{detected_list[i][1]}) Y({detected_list[i][2]},{detected_list[i][3]})    Correlation: {detected_list[i][4]}", tag=LOG_TAG)
+
         """ if debg:
             visualize(display_image, "Objects found (red square)", 1)
             visualize(failed_image, "Failed IMG. Objects found (red square)", 3)  """
 
     else:
-        logger.warning("FAILED")
+        logger.warning("VB", f"FAILED", tag=LOG_TAG)
         cnt = 1
         for i in foundList:
             (tH, tW) = template.shape[:2]
@@ -265,7 +263,7 @@ def mainly(template_path, raw_input_image):
             # draw a bounding box around failed image
             cv2.rectangle(failed_image, (startX, startY), (endX, endY), (255, 0, 0), 2)
             acceptance = i[0]
-            logger.info("Failed matching object correlation %d: %d", cnt, acceptance) 
+            logger.info("VB", f"Failed matching object correlation {cnt}: {acceptance}", tag=LOG_TAG) 
             cnt+=1
 
     #plt.show()

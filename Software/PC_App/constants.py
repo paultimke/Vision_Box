@@ -23,3 +23,7 @@ FOBJ_MT_ITERATIONS = 100              # Iterations to apply Match template algor
 CIMG_IOU_MATCH_THRESHOLD = 0.8
 CIMG_TEXT_MATCH_THRESHOLD = 0.9
 
+
+##### PIXEL CONVERTER constants
+DIAMETER_10_COIN = 28                 # 10 pesos coin diameter is 28 mm 
+
