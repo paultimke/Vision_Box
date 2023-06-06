@@ -50,7 +50,7 @@ def draw_help_text(frame, n_saved_points):
     # Draw help messages at the top of the screen
     (x_start, y_start) = (15, 30)
     COLOR_WHITE_BGR = (255, 255, 255)
-    FONT_SCALE = 1
+    FONT_SCALE = 0.5
     msg = "Left click on the four screen corners in clockwise order\nPress \'s\' to save and quit | Press \'r\' to reset points"
     dy = 30 # Spacing for newlines
     for (i, line) in enumerate(msg.split('\n')):
