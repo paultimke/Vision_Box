@@ -5,6 +5,7 @@ import numpy as np
 import json
 import constants as cnst
 from typing import List, Dict
+import set_light
 
 corner_t = List[int]
 
@@ -13,7 +14,7 @@ corner_t = List[int]
 ref_points = []
 
 ########################### MAIN PROGRAM BODY ############################
-def write_corners_json(corners: List[corner_t]) -> None:
+def write_params_json(corners: List[corner_t], pixel_metric) -> None:
     """ Updates config.json to new calibrated screen corners """
     dic = {
         "screen_corners": {
@@ -21,7 +22,8 @@ def write_corners_json(corners: List[corner_t]) -> None:
             "topR": corners[1],
             "botR": corners[2],
             "botL": corners[3]
-        }
+        },
+        "pixel_metric": pixel_metric
     }
 
     # Serializing json
@@ -69,6 +71,16 @@ def draw_help_text(frame, n_saved_points):
     return img
 
 def main():
+    # Start pixel-dimensions calibrations
+    set_light.Set_light(80, None)
+    print("Vision Box Calibration Tool")
+    print("Enter a 28mm circle or 10 MXN coin at the center of Vision Box")
+    _ = input("Press any key when circle is ready and doors are closed")
+    # aqui funcion de christian
+    pixel_metric = None
+    print(f"Pixels per mm: {pixel_metric}") 
+    set_light.Set_light(0, None)
+
     # load the image, rotate it to face forwards and clone it
     vid = cv2.VideoCapture(int(cnst.DEFAULT_CAM_PORT))
     image = capture_frame(vid)
@@ -109,11 +121,13 @@ def main():
 
                 # Modify configuration file
                 print("\nUpdated configuration file config.json")
-                write_corners_json(ref_points)
+
+                write_params_json(ref_points, pixel_metric)
             break
 
         image = draw_help_text(image, len(ref_points))
         cv2.imshow("Vision Box Calibration Tool", image)
+    # END while(TRUE)
 
     # close all open windows
     cv2.destroyAllWindows()
