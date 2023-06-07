@@ -181,15 +181,18 @@ def find_text(user_text, img )-> list:
         found_text=different_size_in_line(found_text, user_text, l_lines)
 
     if len(found_text)==0:
-        logger.info("VB", 'Failed', tag=LOG_TAG)
+        logger.info("VB", 'FAILED', tag=LOG_TAG)
+        return logger.curr_line_num
+    else:
+        logger.info("VB", 'PASSED', tag=LOG_TAG)
 
     #Show images
     show_images(found_text, img, img1, img2, img3)
 
     times=len(found_text)
-    logger.info("VB", f"Number of times the text '{user_text}' was found: {times}", tag=LOG_TAG)
+    logger.debug("VB", f"Number of times the text '{user_text}' was found: {times}", tag=LOG_TAG)
     for i in range(times):
-        logger.info("VB", f"Postion {i+1}: x: {round(found_text[i][1]/PIXELS_PER_METRIC,2)} mm, y:{round((found_text[i][2]+found_text[i][4])/PIXELS_PER_METRIC)} mm", tag=LOG_TAG)
+        logger.debug("VB", f"Postion {i+1}: x: {round(found_text[i][1]/PIXELS_PER_METRIC,2)} mm, y:{round((found_text[i][2]+found_text[i][4])/PIXELS_PER_METRIC)} mm", tag=LOG_TAG)
     return l_lines
 
 def find_all_words (img)->list:
