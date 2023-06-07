@@ -143,7 +143,7 @@ def CompareIoU(sample_img: cv2.Mat, ref_img: cv2.Mat) -> float:
     logger.debug("VB", f"Structural similarity: {round(sim, 2)}", tag=LOG_TAG)
     return sim
 
-def compare_image(ref_path: str, sample_img: cv2.Mat) -> float:
+def compare_image(ref_path: str, sample_img: cv2.Mat) -> int:
     # Read images
     if sample_img is None:
         logger.warning("VB", "Image could not be read from camera", tag=LOG_TAG)
@@ -169,16 +169,18 @@ def compare_image(ref_path: str, sample_img: cv2.Mat) -> float:
     iou_sim = CompareIoU(sample_img, ref_img)
     if iou_sim < cnst.CIMG_IOU_MATCH_THRESHOLD:
         logger.info("VB", "FAILED", tag=LOG_TAG)
-        return False
+        log_line_num = logger.curr_line_num
+        return log_line_num
     
     text_sim = CompareText(sample_img, ref_img)
     if text_sim < cnst.CIMG_TEXT_MATCH_THRESHOLD:
         logger.info("VB", "FAILED", tag=LOG_TAG)
-        return False
+        log_line_num = logger.curr_line_num
+        return log_line_num
     
     # If execution got here, test is PASSED
     logger.info("VB", "PASSED", tag=LOG_TAG)
-    return True
+    return None
  
 if __name__ == '__main__':
     logger.enable_debug_level()
