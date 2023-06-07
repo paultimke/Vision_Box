@@ -22,7 +22,7 @@ FOBJ_ACCEPTANCE_DIFF = 30             # Acceptance difference between found obje
 FOBJ_MT_ITERATIONS = 100              # Iterations to apply Match template algorithm
 
 ##### COMPARE IMAGE constants
-CIMG_IOU_MATCH_THRESHOLD = 0.6
+CIMG_IOU_MATCH_THRESHOLD = 0.5
 CIMG_TEXT_MATCH_THRESHOLD = 0.9
 
 

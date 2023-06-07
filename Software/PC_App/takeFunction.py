@@ -68,6 +68,19 @@ class callFunction:
             if ( function[1].startswith('(') and function[1].endswith(')') ) or ( function[1].startswith("('") and (function[1].endswith("')")) ):
                 entryTXT = Text = '' ; cnt = 0
                 entryTXT = function[1].translate({ord(i): None for i in '( )'})
+                # remove ' "
+                if (entryTXT.startswith('"') and entryTXT.endswith('"')): 
+                    Text = entryTXT.replace('"', '')
+                elif (entryTXT.startswith("'") and entryTXT.endswith("'")): 
+                    Text = entryTXT.replace("'", '')
+                else: 
+                    Text = entryTXT
+
+                # check if null
+                if len(Text) > 0: 
+                    ret_val = (command_name, Text)
+                else: 
+                    print('Error in Function Call. Path is empty.')
                 # remove (" ") , (' ')
                 #entryTXT = function[1]
                 #entryTXT.removeprefix('(')
@@ -77,16 +90,17 @@ class callFunction:
                 #    if (cnt == (len(function[1])-1)): break
                 #    if (cnt!=1) and (cnt!=2): entryTXT+=i
                 # separate words in list
-                words = entryTXT.split() ; cnt = 0
+                #words = entryTXT.split() ; cnt = 0
                 # concatenate text 
-                if len(words) > 0:
-                    for word in words:
-                        cnt+=1
-                        if cnt < len(words): Text = Text + word + ' '
-                        else: Text += word
-                    ret_val = (command_name, Text)
-                else: 
-                    print('Error in Function Call. Text is empty.') 
+                #if len(words) > 0:
+                #    for word in words:
+                #        cnt+=1
+                #        if cnt < len(words): Text = Text + word + ' '
+                #        else: Text += word
+                #    print(command_name, Text)
+                #    ret_val = (command_name, Text)
+                #else: 
+                #    print('Error in Function Call. Text is empty.') 
             else: 
                 print('Error in Function Call. Bad use of parentheses or quotation marks.') 
     
