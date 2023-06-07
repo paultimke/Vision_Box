@@ -193,6 +193,9 @@ def inputIMG_init(cam_port: str):
     else:
         input_image = cv2.imread(cam_port)
         assert input_image is not None, "Failed to take picture, check camera port"
+
+    if input_image is None:
+        print("ERROR: Can not open camera")
     input_image = cv2.rotate(input_image, rotateCode= cv2.ROTATE_180)
     return input_image
             
