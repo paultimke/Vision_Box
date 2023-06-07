@@ -122,6 +122,9 @@ def process_command(cmd=None, arg=None):
         raw_input_image = None
         if cmd == 'FICON' or cmd == 'FTEXT' or cmd == 'COMPIMAGE':
             raw_input_image = inputIMG_init(cam_port=cnst.DEFAULT_CAM_PORT)
+        elif cmd == 'SETLIGHT':
+            print("SETLIGHT command must be used inside a TESTSTATUS")
+            return
         execute_command(cmd, arg, raw_input_image)
         return
 
