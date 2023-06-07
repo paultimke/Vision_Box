@@ -5,7 +5,7 @@ from cv2 import *
 import numpy as np
 import matplotlib.pyplot as plt
 import imutils 
-import logging
+import pixel_converter as pix
 import constants as cnst
 from vbox_logger import logger
 import crop_screen as cs
@@ -101,6 +101,7 @@ def findObjects(foundList, template, display_image, rating_diff):
     acceptance_diff = cnst.FOBJ_ACCEPTANCE_DIFF
 
     # Template Height and Width
+    #template_diam = pix.obj_size(template)
     (tH, tW) = template.shape[:2]
 
     # Variables init

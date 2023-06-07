@@ -128,15 +128,15 @@ def different_size_in_line(found_text, user_text, l_lines):
 def find_text(user_text, img )-> list:
     """main function to find text"""
 
-    photo='Testing\screens_vbox_cam\T15_vbox_cam.png'
-    img = cv2.imread(photo)
+    #photo='Testing\screens_vbox_cam\T15_vbox_cam.png'
+    #img = cv2.imread(photo)
     x, y, c=img.shape
     #print('size: ' ,img.shape)
     #plt.imshow(img )
     img= cv2.rotate(img, cv2.ROTATE_180)
     # plt.imshow(img)
     img= crop_screen.StraightenAndCrop(img, x, y)
-    user_text='o'
+    #user_text='o'
     
 
     try :
@@ -168,11 +168,13 @@ def find_text(user_text, img )-> list:
         found_text=different_size_in_line(found_text, user_text, l_lines)
            
     #Show images
-    show_images(found_text, img, img1, img2)
+    #show_images(found_text, img, img1, img2)
 
     times=len(found_text)
     logger.info("VB", f"Number of times the text '{user_text}' was found: {times}", tag=LOG_TAG)
     for i in range(times):
         logger.info("VB", f"Postion {i+1}: x: {found_text[i][1]} px, y:{found_text[i][2]+found_text[i][4]} px", tag=LOG_TAG)
 
+
+    print('found', found_text)
     return l_lines
