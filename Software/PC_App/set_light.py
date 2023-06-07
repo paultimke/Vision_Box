@@ -94,7 +94,6 @@ class light_controller:
         return valid
 
 if __name__ == 'set_light':
-    print('Initializing hardware')
     logger.info("VB", 'Initializing serial connection', tag=LOG_TAG)
     light_control = light_controller()
 
