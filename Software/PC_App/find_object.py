@@ -26,10 +26,10 @@ def template_init(template_path):
     return template
 
 
-def inputIMG_process(input_image: cv2.Mat) -> cv2.Mat:
+def inputIMG_process(input_image: cv2.Mat):
     """ Binarize input image, find screen contour and crop image,
         then resize to standard MACRO defeined size""" 
-    x, y, j = input_image.shape
+    x, y, j= input_image.shape
     croppy = cs.StraightenAndCrop(input_image, x, y)
     cut_x, cut_y, j = croppy.shape
 
@@ -233,7 +233,11 @@ def mainly(template_path, raw_input_image):
         logger.info("VB", f"PASSED", tag=LOG_TAG)
         logger.info("VB", f"Number of objects detected: {detected_objs}", tag=LOG_TAG)
         for i in range(0,detected_objs):
-            logger.info("VB", f"Passed object {i+1} coords: X({(detected_list[i][0])*(cut_x/cnst.FOBJ_RESIZE_INPUT_STD)},{(detected_list[i][1])*(cut_x/cnst.FOBJ_RESIZE_INPUT_STD)}) Y({(detected_list[i][2])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD)},{(detected_list[i][3])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD)})    Correlation: {detected_list[i][4]}", tag=LOG_TAG)
+            X1 = round(((detected_list[i][0])*(cut_x/cnst.FOBJ_RESIZE_INPUT_STD[1]))/cnst.PIXELS_PER_METRIC, 1)
+            X2 = round(((detected_list[i][1])*(cut_x/cnst.FOBJ_RESIZE_INPUT_STD[1]))/cnst.PIXELS_PER_METRIC, 1)
+            Y1 = round(((detected_list[i][2])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD[1]))/cnst.PIXELS_PER_METRIC, 1)
+            Y2 = round(((detected_list[i][3])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD[1]))/cnst.PIXELS_PER_METRIC, 1)
+            logger.info("VB", f"Passed object {i+1} coords: X({X1},{X2}) Y({Y1},{Y2})    Correlation: {detected_list[i][4]}", tag=LOG_TAG)
 
     else:
         logger.warning("VB", f"FAILED", tag=LOG_TAG)

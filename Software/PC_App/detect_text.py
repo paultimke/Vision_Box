@@ -12,7 +12,6 @@ LOG_TAG='FTEXT'
 def init():
     """Initializes AWS client for text rekognition"""
     
-
     #Reads AWS access keys from csv
     with open('Visionbox_accessKeys.csv','r')as input:
         next(input)
@@ -177,6 +176,3 @@ def find_text(user_text, img )-> list:
         logger.info("VB", f"Postion {i+1}: x: {found_text[i][1]} px, y:{found_text[i][2]+found_text[i][4]} px", tag=LOG_TAG)
 
     return l_lines
-
-    
-print(find_text(1,1))
