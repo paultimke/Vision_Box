@@ -178,3 +178,32 @@ def find_text(user_text, img )-> list:
         logger.info("VB", f"Postion {i+1}: x: {found_text[i][1]/PIXELS_PER_METRIC} px, y:{(found_text[i][2]+found_text[i][4])/PIXELS_PER_METRIC} mm", tag=LOG_TAG)
 
     return l_words
+
+def find_all_words (img):
+    try :
+        client=init()
+        logger.debug("VB", "AWS client correctly initialize", tag=LOG_TAG)
+    except:
+        logger.error("VB", "Could not initialize AWS client", tag=LOG_TAG)
+        found_text=[]
+        return []
+    
+    img1=copy.deepcopy(img)
+    img2=copy.deepcopy(img)
+
+    
+    source_bytes = cv2.imencode('.png', img)[1].tobytes()
+    try:
+        response= client.detect_text(Image={'Bytes':source_bytes} 
+                                            )
+        logger.debug("VB", "Image correctly sent to AWS client", tag=LOG_TAG)
+    except:
+        logger.error("VB", "Could not send data to AWS client", tag=LOG_TAG)
+        found_text=[]
+        return []
+
+
+    l_lines, l_words, img1, img2=get_words_and_mark(response, img1,img2)
+
+          
+    return l_words
