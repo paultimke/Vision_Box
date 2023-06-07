@@ -51,9 +51,13 @@ def aws_connection(img):
 
 def preprocess_img(img):
     img= cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img = cv2.fastNlMeansDenoising(img, None, 20, 7, 21)
-    img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                          cv2.THRESH_BINARY_INV, 115, 5) 
+    img = cv2.fastNlMeansDenoising(img, None, 5, 7, 21)
+    #img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+    #                                      cv2.THRESH_BINARY, 151, 5)
+
+    # Erode
+    #kernel = np.ones((1, 1), np.uint8)
+    #img = cv2.dilate(img, kernel, iterations=21) 
 
     return img
 
@@ -88,7 +92,7 @@ def get_words_and_mark(responses, img_word, img_line)  :
     l_lines=[]
 
     for i in(responses['TextDetections']):
-        if i['Confidence'] >60:
+        if i['Confidence'] >40:
             if i['Type'] =='WORD':
                 word=i['DetectedText']
                 #box=get_pixelcount(i['Geometry']['BoundingBox'], img_word)
@@ -135,8 +139,11 @@ def show_images (found_text, img, img1, img2, img3):
         text = "".join([c if ord(c) < 128 else "" for c in Text]).strip()
         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.putText(img, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
+    
+    new_img = cv2.cvtColor(img3.copy(), cv2.COLOR_GRAY2BGR)
 
-    img_logger.img_save(LOG_TAG, [img])
+    img_logger.img_save(LOG_TAG, [img, new_img])
+    #img_logger.img_save(LOG_TAG, [img3])
 
 def different_size_in_line(found_text, user_text, l_lines):
     """Checks for different sizes in the same line and joins the bounding box """
@@ -165,7 +172,7 @@ def find_text(user_text, img )-> list:
     #plt.imshow(img )
     #img= cv2.rotate(img, cv2.ROTATE_180)
     # plt.imshow(img)
-    img= crop_screen.StraightenAndCrop(img, x, y)
+    img= crop_screen.StraightenAndCrop_Calibrated(img, x, y)
     #user_text='Cool'
 
     img1=copy.deepcopy(img)
@@ -176,20 +183,22 @@ def find_text(user_text, img )-> list:
     response=aws_connection(img3)   
     l_lines, l_words, img1, img2=get_words_and_mark(response, img1,img2)
     found_text=compare_text(user_text, l_lines)
-    
-    if len(found_text)==0:
-        found_text=different_size_in_line(found_text, user_text, l_lines)
 
     if len(found_text)==0:
-        logger.info("VB", 'FAILED', tag=LOG_TAG)
-        return logger.curr_line_num
-    else:
-        logger.info("VB", 'PASSED', tag=LOG_TAG)
+        found_text=different_size_in_line(found_text, user_text, l_lines)
 
     #Show images
     show_images(found_text, img, img1, img2, img3)
 
+    if len(found_text)==0:
+        logger.info("VB", 'FAILED', tag=LOG_TAG)
+        logger.debug("VB",l_lines, tag=LOG_TAG)
+        return logger.curr_line_num
+    else:
+        logger.info("VB", 'PASSED', tag=LOG_TAG)
+
     times=len(found_text)
+
     logger.debug("VB", f"Number of times the text '{user_text}' was found: {times}", tag=LOG_TAG)
     for i in range(times):
         logger.debug("VB", f"Postion {i+1}: x: {round(found_text[i][1]/PIXELS_PER_METRIC,2)} mm, y:{round((found_text[i][2]+found_text[i][4])/PIXELS_PER_METRIC)} mm", tag=LOG_TAG)
