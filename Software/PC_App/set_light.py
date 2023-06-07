@@ -5,7 +5,7 @@ from vbox_logger import logger
 
 class light_controller:
     LOG_TAG = "SETLIGHT"
-    DELAY_TIME = 0.2
+    DELAY_TIME = 0.5
 
     def __init__(self):
         """ Light Controller object constructor\
@@ -21,7 +21,9 @@ class light_controller:
             try:
                 self._ser = serial.Serial(port.device, 
                                          baudrate=38400,
-                                         timeout=0.5)
+                                         timeout=0.5,
+                                         dsrdtr=True,
+                                         xonxoff=False)
                 
                 # Send dummy byte and wait for response to ensure
                 # connection with real light controller device was made
