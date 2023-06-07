@@ -3,7 +3,7 @@ import constants as cnst
 
 # Wildcard _ is added as arg althought none is used, as every command must 
 # have the same signature for program compatibility
-def help_cmd(_):
+def help_cmd(_, x):
     """ Prints help information to console about command usage """
     PADDING = 2
     MAX_CMD_WIDTH = len("COMPIMAGE(\"path\")") + PADDING
@@ -38,5 +38,5 @@ def help_cmd(_):
 
 # Wildcard _ is added as arg althought none is used, as every command must 
 # have the same signature for program compatibility
-def example_cmd(_):
+def example_cmd(_, x):
     pass
