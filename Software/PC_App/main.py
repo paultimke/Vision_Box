@@ -17,6 +17,7 @@ from vbox_logger import logger
 debug_flag = False
 cmd_queue = []
 failed_commands = []
+vision_cmds_ran = False
 mutex = threading.Lock()
 
 cmd_lookup_table = {
@@ -50,12 +51,16 @@ def main():
     # Call corresponding command
     match command_args:
         case ('TESTSTATUS', condition):
-            # Start CLI and command-servicing threads
-            cli = threading.Thread(target=CLI_handler, args=(condition, ), daemon=True)
-            cmd_server = threading.Thread(target=process_command, daemon=False)
-            cli.start()
-            cmd_server.start()
-            cli.join()
+            print('Initializing hardware')
+            if condition == 'START':
+                # Start CLI and command-servicing threads
+                cli = threading.Thread(target=CLI_handler, args=(condition, ), daemon=True)
+                cmd_server = threading.Thread(target=process_command, daemon=False)
+                cli.start()
+                cmd_server.start()
+                cli.join()
+            elif condition == 'END':
+                print("Error: Can not end TESTSTATUS if none is started before")
         case (None, None):
             logger.error("VB", "Command call Syntax Error")
             return
@@ -63,9 +68,13 @@ def main():
             process_command(cmd, arg)
         case _:
             logger.error("VB", "Unknown Error")
-    if len(failed_commands) == 0:
+
+    # Log final results
+    if len(failed_commands) == 0 and vision_cmds_ran:
+        print("Test result: PASSED")
         logger.info("VB", f'\nPASSED')
-    else:
+    elif len(failed_commands) > 0 and vision_cmds_ran:
+        print("Test result: FAILED")
         logger.info("VB", f'FAILED lines: {failed_commands}')
 # END main()
 
@@ -128,6 +137,8 @@ def process_command(cmd=None, arg=None):
     if (cmd, arg) != (None, None):
         raw_input_image = None
         if cmd == 'FICON' or cmd == 'FTEXT' or cmd == 'COMPIMAGE':
+            global vision_cmds_ran 
+            vision_cmds_ran = True
             raw_input_image = inputIMG_init(cam_port=cnst.DEFAULT_CAM_PORT)
         elif cmd == 'SETLIGHT':
             print("SETLIGHT command must be used inside a TESTSTATUS")
