@@ -131,10 +131,6 @@ def CompareIoU(sample_img: cv2.Mat, ref_img: cv2.Mat) -> float:
     REF_PROCESSED = img_preprocess_IoU_ref(ref_img)
     SAMPLE_PROCESSED = cv2.resize(SAMPLE_PROCESSED, 
                                     (REF_PROCESSED.shape[1], REF_PROCESSED.shape[0]))
-    
-    #pros = cv2.hconcat([SAMPLE_PROCESSED, REF_PROCESSED])
-    #cv2.imwrite("PROCESSED.png", pros)
-    img_logger.img_save(LOG_TAG, [SAMPLE_PROCESSED, REF_PROCESSED])
 
     # Calculate bounding boxes
     contours_sample, _ = cv2.findContours(SAMPLE_PROCESSED, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
