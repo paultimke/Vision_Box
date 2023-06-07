@@ -176,7 +176,6 @@ def compare_image(ref_path: str, sample_img: cv2.Mat) -> float:
         return False
     
     text_sim = CompareText(sample_img, ref_img)
-    print(text_sim)
     if text_sim < cnst.CIMG_TEXT_MATCH_THRESHOLD:
         logger.info("VB", "FAILED", tag=LOG_TAG)
         return False

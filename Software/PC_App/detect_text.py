@@ -17,7 +17,7 @@ def aws_init():
     """Initializes AWS client for text rekognition"""
     
     #Reads AWS access keys from csv
-    with open('Software\PC_App\Visionbox_accessKeys.csv','r')as input:
+    with open('Visionbox_accessKeys.csv','r')as input:
         next(input)
         reader=csv.reader(input)
         for line in reader:
@@ -86,7 +86,7 @@ def get_words_and_mark(responses, img_word, img_line)  :
     #Bounding box: x,y,w,h
     l_words=[] 
     l_lines=[]
-    print(responses)
+
     for i in(responses['TextDetections']):
         if i['Confidence'] >60:
             if i['Type'] =='WORD':
