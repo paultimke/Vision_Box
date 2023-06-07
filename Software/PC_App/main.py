@@ -16,6 +16,7 @@ from vbox_logger import logger
 ############################### Global variables ##############################
 debug_flag = False
 cmd_queue = []
+failed_commands = []
 mutex = threading.Lock()
 
 cmd_lookup_table = {
@@ -62,6 +63,10 @@ def main():
             process_command(cmd, arg)
         case _:
             logger.error("VB", "Unknown Error")
+    if len(failed_commands) == 0:
+        logger.info("VB", f'\nPASSED')
+    else:
+        logger.info("VB", f'FAILED lines: {failed_commands}')
 # END main()
 
 def CLI_handler(condition: str):
@@ -114,7 +119,9 @@ def process_command(cmd=None, arg=None):
     """ Thread to handle command processing. It takes commands\
         out of the common cmd_queue """
     def execute_command(cmd, arg, raw_im):
-        cmd_lookup_table[cmd](arg, raw_im)
+        status = cmd_lookup_table[cmd](arg, raw_im)
+        if status is not None:
+            failed_commands.append(status)
 
             
     # Commands were given directly and no concurrency is happening

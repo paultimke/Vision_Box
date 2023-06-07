@@ -243,7 +243,9 @@ def mainly(template_path, raw_input_image):
     
     #for i in range(0,rejected_objects): ###
         #logger.debug("VB", f"Failed object {i+1} coords: X({rejected_list[i][0]},{rejected_list[i][1]}) Y({rejected_list[i][2]},{rejected_list[i][3]})    Correlation: {rejected_list[i][4]}", tag= LOG_TAG)
-
+    
+    img_logger.img_save(LOG_TAG, [display_image])
+    
     if detected_objs != 0:
         logger.info("VB", f"PASSED", tag=LOG_TAG)
         logger.info("VB", f"Number of objects detected: {detected_objs}", tag=LOG_TAG)
@@ -253,9 +255,11 @@ def mainly(template_path, raw_input_image):
             Y1 = round(((detected_list[i][2])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD[1]))/cnst.PIXELS_PER_METRIC, 1)
             Y2 = round(((detected_list[i][3])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD[1]))/cnst.PIXELS_PER_METRIC, 1)
             logger.info("VB", f"Passed object {i+1} coords: X({X1},{X2}) Y({Y1},{Y2})    Correlation: {detected_list[i][4]}", tag=LOG_TAG)
+        return None 
 
     else:
         logger.warning("VB", f"FAILED", tag=LOG_TAG)
+        return logger.curr_line_num
 
-    img_logger.img_save(LOG_TAG, [display_image])
+
 
