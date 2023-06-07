@@ -10,15 +10,6 @@ def _configure_logger():
 def configure_img_logger():
     return Image_logger(cnst.OUTPUT_IMAGES_DIR)
 
-def img_show(img_list):
-    """ Shows a list of images """
-    if len(img_list) == 1:
-        plt.imshow(cv2.cvtColor(img_list[0], cv2.COLOR_BGR2RGB))
-    else:
-        _, imarr = plt.subplots(1, len(img_list))
-        for i in range(len(img_list)):
-            imarr[i].imshow(cv2.cvtColor(img_list[i], cv2.COLOR_BGR2RGB))
-
 class Image_logger():
     def __init__(self, dir_path):
         self.dir_path = dir_path
@@ -29,15 +20,7 @@ class Image_logger():
             os.mkdir(self.dir_path)
 
     def img_save(self, cmd_name: str, img_list):
-        #img = img_list[0]
-        #img_show([img])
-        #img_show(img_list)
-        img = cv2.hconcat(img_list)
-        #cv2.imshow("img",img)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
-
-        #img_show(img)
+        img = self._hconcat_resize(img_list)
 
         img_name = "Untitled"
         match cmd_name:
@@ -55,6 +38,21 @@ class Image_logger():
 
         img_path = os.path.join(self.dir_path, img_name)
         cv2.imwrite(img_path, img)
+
+    def _hconcat_resize(self, img_list, interpolation=cv2.INTER_CUBIC):
+        # take minimum hights
+        h_min = min(img.shape[0] 
+                    for img in img_list)
+        
+        # image resizing 
+        im_list_resize = [cv2.resize(img,
+                        (int(img.shape[1] * h_min / img.shape[0]),
+                            h_min), interpolation
+                                    = interpolation) 
+                        for img in img_list]
+        
+        # return final image
+        return cv2.hconcat(im_list_resize)
 
 
 class VBOX_logger:
