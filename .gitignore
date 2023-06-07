@@ -6,6 +6,9 @@ Software/Illumination_FW/sdkconfig.old
 Software/Illumination_FW/.devcontainer
 Software/Illumination_FW/dependencies.lock
 
+#Output images directory
+output_images/
+
 #Debug json file
 launch.json
 
