@@ -4,9 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
 from crop_screen import StraightenAndCrop, StraightenAndCrop_Calibrated
-from find_text import find_all_words
+#from find_text import find_all_words
 from vbox_logger import logger, img_logger
 import constants as cnst
+import detect_text
 
 # Box type (x, y, w, h) where (x,y) is Top-Left and (w,h) are width and height
 box_t = Tuple[int, int, int, int]
@@ -26,7 +27,6 @@ def img_show(img_list: List[cv2.Mat]):
 def img_preprocess_IoU_ref(img: cv2.Mat) -> cv2.Mat:
     """ Processes an image to make it ready for IoU comparison """
     # Binarize
-    THRESH = 150
     new_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     new_img = cv2.adaptiveThreshold(new_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                           cv2.THRESH_BINARY_INV, 199, 5)
@@ -99,17 +99,17 @@ def img_getSimilarity(sample_boxes: List[box_t], ref_boxes: List[box_t]) -> floa
         boxesA.pop(0)
     return (len(IoU_matches)/len(ref_boxes))
 
-def CompareText(sample_img: cv2.Mat, ref_path: str) -> float:
+def CompareText(sample_img: cv2.Mat, ref_img: str) -> float:
     # Temporarily save sample img while find_text module
     # is ready to accept images
-    tmp_sample_path = 'sample_tmp.png'
+    #tmp_sample_path = 'sample_tmp.png'
     sample_img = img_preprocess_Text(sample_img)
-    cv2.imwrite(tmp_sample_path, sample_img)
+    #cv2.imwrite(tmp_sample_path, sample_img)
 
     # Read all words in both images and delete temporary img after done
-    sample_words = find_all_words(tmp_sample_path)
-    ref_words = find_all_words(ref_path)
-    os.remove(tmp_sample_path)
+    sample_words = [wrd[0] for wrd in detect_text.find_all_words(sample_img)]
+    ref_words = [wrd[0] for wrd in detect_text.find_all_words(ref_img)]
+    #os.remove(tmp_sample_path)
 
     # Compare words
     matches = 0
@@ -162,7 +162,9 @@ def compare_image(ref_path: str, sample_img: cv2.Mat) -> float:
         return
 
     # First crop sample_img to show only screen of device
-    sample_img = StraightenAndCrop_Calibrated(sample_img, ref_img.shape[1], ref_img.shape[0])
+    sample_img = StraightenAndCrop_Calibrated(sample_img, 
+                                              ref_img.shape[1], 
+                                              ref_img.shape[0])
 
     # Save images
     img_logger.img_save(LOG_TAG, [sample_img, ref_img])
@@ -173,11 +175,11 @@ def compare_image(ref_path: str, sample_img: cv2.Mat) -> float:
         logger.info("VB", "FAILED", tag=LOG_TAG)
         return False
     
-    #text_sim = CompareText(sample_img, ref_path)
-    #print(text_sim)
-    #if text_sim < cnst.CIMG_TEXT_MATCH_THRESHOLD:
-    #    logger.info("VB", "FAILED", tag=LOG_TAG)
-    #    return False
+    text_sim = CompareText(sample_img, ref_img)
+    print(text_sim)
+    if text_sim < cnst.CIMG_TEXT_MATCH_THRESHOLD:
+        logger.info("VB", "FAILED", tag=LOG_TAG)
+        return False
     
     # If execution got here, test is PASSED
     logger.info("VB", "PASSED", tag=LOG_TAG)
