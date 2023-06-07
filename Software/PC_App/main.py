@@ -184,9 +184,11 @@ def inputIMG_init(cam_port: str):
     print("Entro aqui")
     """ Read input image """
     if cam_port == "0" or cam_port == "1" or cam_port == "2" or cam_port == "3" or cam_port == "4":
-        cam = cv2.VideoCapture(int(cam_port))
-        time.sleep(1.5)
-        _,input_image = cam.read() 
+        cam = cv2.VideoCapture(int(cam_port), cv2.CAP_DSHOW)
+        time.sleep(1)
+        for i in range(0,6):
+            _,input_image = cam.read() 
+            time.sleep(0.2)
         cv2.waitKey(1)       
         cam.release()
     else:

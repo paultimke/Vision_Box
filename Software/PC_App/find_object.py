@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 import imutils 
 import pixel_converter as pix
 import constants as cnst
-from vbox_logger import logger
+from vbox_logger import logger, img_logger
 import crop_screen as cs
+import json
 
 LOG_TAG= 'FICON'
 
@@ -22,7 +23,8 @@ def visualize(img, title:str, figure:int):
 def template_init(template_path):
     """ Read template image """
     template= cv2.imread(template_path)
-    assert template is not None, "File could not be read, check with os.path.exists()"
+
+    if template is None: logger.error("VB", "File could not be read, check with os.path.exists()", tag=LOG_TAG)
     return template
 
 
@@ -30,15 +32,26 @@ def inputIMG_process(input_image: cv2.Mat):
     """ Binarize input image, find screen contour and crop image,
         then resize to standard MACRO defeined size""" 
     x, y, j= input_image.shape
-    croppy = cs.StraightenAndCrop(input_image, x, y)
-    cut_x, cut_y, j = croppy.shape
+    croppy = cs.StraightenAndCrop_Calibrated(input_image, x, y)
+    with open(cnst.CONFIG_FILE_NAME, "r") as infile:
+        config_data = json.load(infile)
+        corners = [
+            config_data["screen_corners"]["topL"],
+            config_data["screen_corners"]["topR"],
+            config_data["screen_corners"]["botL"],
+            config_data["screen_corners"]["botR"]
+        ]
 
-    (xsize, ysize) = cnst.FOBJ_RESIZE_INPUT_STD
+    cut_x = corners[1][0] - corners[0][0]
+    cut_y = corners[3][0] - corners[2][0]
+
+    (xsize, _) = cnst.FOBJ_RESIZE_INPUT_STD
     kernel = np.ones((1,1), np.uint8)
 
     gray_input_image = cv2.cvtColor(croppy, cv2.COLOR_BGR2GRAY)
     img_thresh = cv2.adaptiveThreshold(gray_input_image,255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 105, 5)
     img_erode = cv2.dilate(img_thresh, kernel, iterations=15)
+    #canny = cv2.Canny(img_erode, 50, 200)
 
     (tH, tW) = img_erode.shape[:2]
     aspect_ratio = tH/tW
@@ -94,14 +107,15 @@ def matchTemplate(input_img, template):
     return foundList
 
 
-def findObjects(foundList, template, display_image, rating_diff):
+def findObjects(foundList, template, display_image, rating_diff, raw_template):
     """ Iterate in list of matched objetcs and filter by correlation value and position """
     
     found_treshold = cnst.FOBJ_MATCH_THRESHOLD
     acceptance_diff = cnst.FOBJ_ACCEPTANCE_DIFF
 
     # Template Height and Width
-    #template_diam = pix.obj_size(template)
+    #template_diam = pix.obj_size(raw_template)
+    #tW = tH = template_diam*1.5
     (tH, tW) = template.shape[:2]
 
     # Variables init
@@ -225,7 +239,7 @@ def mainly(template_path, raw_input_image):
     template = template_process(raw_template)  
 
     foundList = matchTemplate(inputIMG, template)
-    detected_list, detected_objs, display_image, rejected_list, rejected_objects, failed_image = findObjects(foundList, template, inputIMG, rating_diff)
+    detected_list, detected_objs, display_image, rejected_list, rejected_objects, failed_image = findObjects(foundList, template, inputIMG, rating_diff, raw_template)
     
     #for i in range(0,rejected_objects): ###
         #logger.debug("VB", f"Failed object {i+1} coords: X({rejected_list[i][0]},{rejected_list[i][1]}) Y({rejected_list[i][2]},{rejected_list[i][3]})    Correlation: {rejected_list[i][4]}", tag= LOG_TAG)
@@ -243,9 +257,5 @@ def mainly(template_path, raw_input_image):
     else:
         logger.warning("VB", f"FAILED", tag=LOG_TAG)
 
-    try:
-        cv2.imwrite('buena.png', display_image)
-        print('si')
-    except:
-        cv2.imwrite('mala.png', failed_image)
+    img_logger.img_save(LOG_TAG, [display_image])
 
