@@ -20,6 +20,7 @@ class Image_logger():
             os.mkdir(self.dir_path)
 
     def img_save(self, cmd_name: str, img_list):
+        print('si la guardo ')
         img = self._hconcat_resize(img_list)
 
         img_name = "Untitled"
