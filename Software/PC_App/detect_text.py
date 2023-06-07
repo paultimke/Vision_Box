@@ -6,6 +6,7 @@ import crop_screen
 import find_object
 import matplotlib.pyplot as plt
 from vbox_logger import logger
+from constants import PIXELS_PER_METRIC
 
 LOG_TAG='FTEXT'
 
@@ -13,7 +14,7 @@ def init():
     """Initializes AWS client for text rekognition"""
     
     #Reads AWS access keys from csv
-    with open('Visionbox_accessKeys.csv','r')as input:
+    with open('Software\PC_App\Visionbox_accessKeys.csv','r')as input:
         next(input)
         reader=csv.reader(input)
         for line in reader:
@@ -70,7 +71,7 @@ def get_words_and_mark(responses, img_word, img_line)  :
             box.insert(0, line)
             l_lines.append(tuple(box))
     #print('words', l_words)
-    return l_lines, img_word, img_line
+    return l_lines, l_words, img_word, img_line
 
 
 def compare_text(input_text, l_line)->list:
@@ -133,7 +134,7 @@ def find_text(user_text, img )-> list:
     x, y, c=img.shape
     #print('size: ' ,img.shape)
     #plt.imshow(img )
-    img= cv2.rotate(img, cv2.ROTATE_180)
+    #img= cv2.rotate(img, cv2.ROTATE_180)
     # plt.imshow(img)
     img= crop_screen.StraightenAndCrop(img, x, y)
     #user_text='o'
@@ -162,7 +163,7 @@ def find_text(user_text, img )-> list:
         return []
 
 
-    l_lines, img1, img2=get_words_and_mark(response, img1,img2)
+    l_lines, l_words, img1, img2=get_words_and_mark(response, img1,img2)
     found_text=compare_text(user_text, l_lines)
     if len(found_text)==0:
         found_text=different_size_in_line(found_text, user_text, l_lines)
@@ -172,9 +173,8 @@ def find_text(user_text, img )-> list:
 
     times=len(found_text)
     logger.info("VB", f"Number of times the text '{user_text}' was found: {times}", tag=LOG_TAG)
+    #print('found text:', found_text)
     for i in range(times):
-        logger.info("VB", f"Postion {i+1}: x: {found_text[i][1]} px, y:{found_text[i][2]+found_text[i][4]} px", tag=LOG_TAG)
+        logger.info("VB", f"Postion {i+1}: x: {found_text[i][1]/PIXELS_PER_METRIC} px, y:{(found_text[i][2]+found_text[i][4])/PIXELS_PER_METRIC} mm", tag=LOG_TAG)
 
-
-    print('found', found_text)
-    return l_lines
+    return l_words
