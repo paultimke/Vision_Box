@@ -199,10 +199,11 @@ def find_text(user_text, img )-> list:
 
     times=len(found_text)
 
+    # If execution is here, command is PASSED, return None
     logger.debug("VB", f"Number of times the text '{user_text}' was found: {times}", tag=LOG_TAG)
     for i in range(times):
         logger.debug("VB", f"Postion {i+1}: x: {round(found_text[i][1]/PIXELS_PER_METRIC,2)} mm, y:{round((found_text[i][2]+found_text[i][4])/PIXELS_PER_METRIC)} mm", tag=LOG_TAG)
-    return l_lines
+    return None
 
 def find_all_words (img)->list:
 
