@@ -3,9 +3,9 @@ import serial.tools.list_ports
 import time
 from vbox_logger import logger
 
+LOG_TAG = "SETLIGHT"
 class light_controller:
-    LOG_TAG = "SETLIGHT"
-    DELAY_TIME = 0.5
+    DELAY_TIME = 2
 
     def __init__(self):
         """ Light Controller object constructor\
@@ -22,9 +22,9 @@ class light_controller:
                 self._ser = serial.Serial(port.device, 
                                          baudrate=38400,
                                          timeout=0.5,
-                                         dsrdtr=True,
+                                         dsrdtr=False,
                                          xonxoff=False)
-                
+
                 # Send dummy byte and wait for response to ensure
                 # connection with real light controller device was made
                 time.sleep(self.DELAY_TIME)
@@ -35,7 +35,7 @@ class light_controller:
                 if self._wait_mcu_ack(DUMMY_BYTES):
                     self.setup_complete = True
                     logger.debug("VB", f"Connection to {port.device} successful", 
-                                 tag=self.LOG_TAG)
+                                 tag=LOG_TAG)
                     break
                 else:
                     # If ACK was not received, close connection with
@@ -46,7 +46,7 @@ class light_controller:
         
         if not self.setup_complete:
             logger.warning("VB", "Could not establish a connection with " 
-                  "Light Controller Hardware", tag=self.LOG_TAG)
+                  "Light Controller Hardware", tag=LOG_TAG)
 
     def detach(self):
         """ Light Controller object destructor\
@@ -54,7 +54,7 @@ class light_controller:
         if self.setup_complete:
             self._ser.close()
             logger.debug("VB", f"Connection with {self._ser.port} closed", 
-                         tag=self.LOG_TAG)
+                         tag=LOG_TAG)
 
     def set_brightness(self, luxes: int):
         """ Command to set Vision Box light brightness level"""
@@ -66,7 +66,7 @@ class light_controller:
             # Confirm data sent was received well
             if self._wait_mcu_ack(tx_bytes):
                 logger.info("VB", f"Light brightness succesfully set to {luxes} lux",
-                            tag=self.LOG_TAG)
+                            tag=LOG_TAG)
 
     def _serialize_luxes(self, luxes: int):
         """ Converts int lux value into corresponding string to be sent\
@@ -93,7 +93,10 @@ class light_controller:
                 valid = True
         return valid
 
-def Set_light(luxes, _):
+if __name__ == 'set_light':
+    print('Initializing hardware')
+    logger.info("VB", 'Initializing serial connection', tag=LOG_TAG)
     light_control = light_controller()
+
+def Set_light(luxes, _):
     light_control.set_brightness(luxes)
-    light_control.detach()
