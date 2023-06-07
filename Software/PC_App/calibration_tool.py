@@ -6,6 +6,7 @@ import json
 import constants as cnst
 from typing import List, Dict
 import set_light
+import pixel_converter as pix
 
 corner_t = List[int]
 
@@ -75,11 +76,13 @@ def main():
     set_light.Set_light(80, None)
     print("Vision Box Calibration Tool")
     print("Enter a 28mm circle or 10 MXN coin at the center of Vision Box")
-    _ = input("Press any key when circle is ready and doors are closed")
-    # aqui funcion de christian
-    pixel_metric = None
+    _ = input("Press ENTER when circle is ready and doors are closed")
+    pixel_metric = pix.get_pixels_per_metric()
     print(f"Pixels per mm: {pixel_metric}") 
     set_light.Set_light(0, None)
+
+    print("Remove coin and insert device")
+    _ = input("Press ENTER when device is ready")
 
     # load the image, rotate it to face forwards and clone it
     vid = cv2.VideoCapture(int(cnst.DEFAULT_CAM_PORT))

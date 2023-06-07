@@ -232,6 +232,9 @@ def show_image_list(list_images, list_titles=None, list_cmaps=None, grid=True, n
 
 def mainly(template_path, raw_input_image):  
     rating_diff = 90
+    with open(cnst.CONFIG_FILE_NAME, "r") as infile:
+        config_data = json.load(infile)
+        pixel_metric = config_data["pixel_metric"]
 
     raw_template = template_init(template_path)
 
@@ -250,10 +253,10 @@ def mainly(template_path, raw_input_image):
         logger.info("VB", f"PASSED", tag=LOG_TAG)
         logger.info("VB", f"Number of objects detected: {detected_objs}", tag=LOG_TAG)
         for i in range(0,detected_objs):
-            X1 = round(((detected_list[i][0])*(cut_x/cnst.FOBJ_RESIZE_INPUT_STD[1]))/cnst.PIXELS_PER_METRIC, 1)
-            X2 = round(((detected_list[i][1])*(cut_x/cnst.FOBJ_RESIZE_INPUT_STD[1]))/cnst.PIXELS_PER_METRIC, 1)
-            Y1 = round(((detected_list[i][2])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD[1]))/cnst.PIXELS_PER_METRIC, 1)
-            Y2 = round(((detected_list[i][3])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD[1]))/cnst.PIXELS_PER_METRIC, 1)
+            X1 = round(((detected_list[i][0])*(cut_x/cnst.FOBJ_RESIZE_INPUT_STD[1]))/pixel_metric, 1)
+            X2 = round(((detected_list[i][1])*(cut_x/cnst.FOBJ_RESIZE_INPUT_STD[1]))/pixel_metric, 1)
+            Y1 = round(((detected_list[i][2])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD[1]))/pixel_metric, 1)
+            Y2 = round(((detected_list[i][3])*(cut_y/cnst.FOBJ_RESIZE_INPUT_STD[1]))/pixel_metric, 1)
             logger.info("VB", f"Passed object {i+1} coords: X({X1},{X2}) Y({Y1},{Y2})    Correlation: {detected_list[i][4]}", tag=LOG_TAG)
         return None 
 

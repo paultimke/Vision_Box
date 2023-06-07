@@ -7,7 +7,8 @@ import find_object
 import matplotlib.pyplot as plt
 from vbox_logger import logger
 from vbox_logger import img_logger
-from constants import PIXELS_PER_METRIC
+import constants as cnst
+import json
 import numpy as np
 import jellyfish
 
@@ -198,11 +199,14 @@ def find_text(user_text, img )-> list:
         logger.info("VB", 'PASSED', tag=LOG_TAG)
 
     times=len(found_text)
+    with open(cnst.CONFIG_FILE_NAME, "r") as infile:
+        config_data = json.load(infile)
+        pixel_metric = config_data["pixel_metric"]
 
     # If execution is here, command is PASSED, return None
     logger.debug("VB", f"Number of times the text '{user_text}' was found: {times}", tag=LOG_TAG)
     for i in range(times):
-        logger.debug("VB", f"Postion {i+1}: x: {round(found_text[i][1]/PIXELS_PER_METRIC,2)} mm, y:{round((found_text[i][2]+found_text[i][4])/PIXELS_PER_METRIC)} mm", tag=LOG_TAG)
+        logger.debug("VB", f"Postion {i+1}: x: {round(found_text[i][1]/pixel_metric,2)} mm, y:{round((found_text[i][2]+found_text[i][4])/pixel_metric)} mm", tag=LOG_TAG)
     return None
 
 def find_all_words (img)->list:

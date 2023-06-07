@@ -17,8 +17,10 @@ from vbox_logger import logger
 debug_flag = False
 cmd_queue = []
 failed_commands = []
-vision_cmds_ran = False
 mutex = threading.Lock()
+
+class print_flag:
+    vision_cmds_ran = False
 
 cmd_lookup_table = {
     'FICON': fOBJ.mainly,
@@ -68,12 +70,11 @@ def main():
             process_command(cmd, arg)
         case _:
             logger.error("VB", "Unknown Error")
-
     # Log final results
-    if len(failed_commands) == 0 and vision_cmds_ran:
+    if len(failed_commands) == 0 and print_flag.vision_cmds_ran:
         print("Test result: PASSED")
         logger.info("VB", f'\nPASSED')
-    elif len(failed_commands) > 0 and vision_cmds_ran:
+    elif len(failed_commands) > 0 and print_flag.vision_cmds_ran:
         print("Test result: FAILED")
         logger.info("VB", f'FAILED lines: {failed_commands}')
 # END main()
@@ -128,6 +129,8 @@ def process_command(cmd=None, arg=None):
     """ Thread to handle command processing. It takes commands\
         out of the common cmd_queue """
     def execute_command(cmd, arg, raw_im):
+        if cmd == 'FICON' or cmd == 'FTEXT' or cmd == 'COMPIMAGE': 
+            print_flag.vision_cmds_ran = True
         status = cmd_lookup_table[cmd](arg, raw_im)
         if status is not None:
             failed_commands.append(status)
@@ -136,9 +139,7 @@ def process_command(cmd=None, arg=None):
     # Commands were given directly and no concurrency is happening
     if (cmd, arg) != (None, None):
         raw_input_image = None
-        if cmd == 'FICON' or cmd == 'FTEXT' or cmd == 'COMPIMAGE':
-            global vision_cmds_ran 
-            vision_cmds_ran = True
+        if cmd == 'FICON' or cmd == 'FTEXT' or cmd == 'COMPIMAGE': 
             raw_input_image = inputIMG_init(cam_port=cnst.DEFAULT_CAM_PORT)
         elif cmd == 'SETLIGHT':
             print("SETLIGHT command must be used inside a TESTSTATUS")
@@ -205,7 +206,7 @@ def inputIMG_init(cam_port: str):
     """ Read input image """
     if cam_port == "0" or cam_port == "1" or cam_port == "2" or cam_port == "3" or cam_port == "4":
         cam = cv2.VideoCapture(int(cam_port), cv2.CAP_DSHOW)
-        time.sleep(1)
+        time.sleep(0.2)
         for i in range(0,6):
             _,input_image = cam.read() 
             time.sleep(0.2)
