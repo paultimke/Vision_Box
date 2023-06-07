@@ -65,13 +65,17 @@ class callFunction:
 
             command_name = 'FTEXT'
             function = self.name.split(command_name)
-            if ( function[1].startswith('("') and function[1].endswith('")') ) or ( function[1].startswith("('") and (function[1].endswith("')")) ):
+            if ( function[1].startswith('(') and function[1].endswith(')') ) or ( function[1].startswith("('") and (function[1].endswith("')")) ):
                 entryTXT = Text = '' ; cnt = 0
+                entryTXT = function[1].translate({ord(i): None for i in '( )'})
                 # remove (" ") , (' ')
-                for i in function[1]:
-                    cnt+=1
-                    if (cnt == (len(function[1])-1)): break
-                    if (cnt!=1) and (cnt!=2): entryTXT+=i
+                #entryTXT = function[1]
+                #entryTXT.removeprefix('(')
+                #entryTXT.removesuffix(')')
+                #for i in function[1]:
+                #    cnt+=1
+                #    if (cnt == (len(function[1])-1)): break
+                #    if (cnt!=1) and (cnt!=2): entryTXT+=i
                 # separate words in list
                 words = entryTXT.split() ; cnt = 0
                 # concatenate text 
