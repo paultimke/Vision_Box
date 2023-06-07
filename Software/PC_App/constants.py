@@ -23,7 +23,7 @@ FOBJ_MT_ITERATIONS = 100              # Iterations to apply Match template algor
 
 ##### COMPARE IMAGE constants
 CIMG_IOU_MATCH_THRESHOLD = 0.5
-CIMG_TEXT_MATCH_THRESHOLD = 0.9
+CIMG_TEXT_MATCH_THRESHOLD = 0.6
 
 
 ##### PIXEL CONVERTER constants
