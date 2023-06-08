@@ -244,8 +244,7 @@ def mainly(template_path, raw_input_image):
     foundList = matchTemplate(inputIMG, template)
     detected_list, detected_objs, display_image, rejected_list, rejected_objects, failed_image = findObjects(foundList, template, inputIMG, rating_diff, raw_template)
     
-    #for i in range(0,rejected_objects): ###
-        #logger.debug("VB", f"Failed object {i+1} coords: X({rejected_list[i][0]},{rejected_list[i][1]}) Y({rejected_list[i][2]},{rejected_list[i][3]})    Correlation: {rejected_list[i][4]}", tag= LOG_TAG)
+
     
     img_logger.img_save(LOG_TAG, [display_image])
     

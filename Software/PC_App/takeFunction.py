@@ -81,26 +81,6 @@ class callFunction:
                     ret_val = (command_name, Text)
                 else: 
                     print('Error in Function Call. Path is empty.')
-                # remove (" ") , (' ')
-                #entryTXT = function[1]
-                #entryTXT.removeprefix('(')
-                #entryTXT.removesuffix(')')
-                #for i in function[1]:
-                #    cnt+=1
-                #    if (cnt == (len(function[1])-1)): break
-                #    if (cnt!=1) and (cnt!=2): entryTXT+=i
-                # separate words in list
-                #words = entryTXT.split() ; cnt = 0
-                # concatenate text 
-                #if len(words) > 0:
-                #    for word in words:
-                #        cnt+=1
-                #        if cnt < len(words): Text = Text + word + ' '
-                #        else: Text += word
-                #    print(command_name, Text)
-                #    ret_val = (command_name, Text)
-                #else: 
-                #    print('Error in Function Call. Text is empty.') 
             else: 
                 print('Error in Function Call. Bad use of parentheses or quotation marks.') 
     

@@ -7,7 +7,7 @@ SW_VERSION_REV = 0
 PIXELS_PER_METRIC = 3.54
 SOFTWARE_VERSION = f"{SW_VERSION_MAJOR}.{SW_VERSION_MINOR}.{SW_VERSION_REV}"
 
-DEFAULT_CAM_PORT = '1'               # Default USB port for camera
+DEFAULT_CAM_PORT = '0'               # Default USB port for camera
 DEFAULT_LOG_FILE_NAME = "vbox.log"    # Default file name for log
 OUTPUT_IMAGES_DIR = "output_images"   # Output images directory
 CONFIG_FILE_NAME = "config.json"      # File name for configuration

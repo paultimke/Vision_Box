@@ -39,8 +39,8 @@ def obj_size(input_img):
     return diameter
 
 def get_pixels_per_metric():
-    input_img = take_pic(cnst.DEFAULT_CAM_PORT)    #cnst.DEFAULT_CAM_PORT  "Testing/screens/10_coin.png"
+    input_img = take_pic(cnst.DEFAULT_CAM_PORT)    
     diameter = obj_size(input_img)
-    return (diameter / cnst.DIAMETER_10_COIN)              #3.5535714285714284
+    return (diameter / cnst.DIAMETER_10_COIN)  
 
 

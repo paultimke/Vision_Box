@@ -67,4 +67,4 @@ def example_cmd(_, x):
     print("\nOptions")
     cmd = "-verbose"
     print(f"{cmd:<{MAX_CMD_WIDTH}}", "TESTSTATUS(START) -verbose")
-    pass
+# END example_cmd()

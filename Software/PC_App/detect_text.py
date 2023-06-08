@@ -53,13 +53,6 @@ def aws_connection(img):
 def preprocess_img(img):
     img= cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = cv2.fastNlMeansDenoising(img, None, 5, 7, 21)
-    #img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-    #                                      cv2.THRESH_BINARY, 151, 5)
-
-    # Erode
-    #kernel = np.ones((1, 1), np.uint8)
-    #img = cv2.dilate(img, kernel, iterations=21) 
-
     return img
 
 def make_boxes(Text, Geometry, img):
@@ -96,14 +89,12 @@ def get_words_and_mark(responses, img_word, img_line)  :
         if i['Confidence'] >40:
             if i['Type'] =='WORD':
                 word=i['DetectedText']
-                #box=get_pixelcount(i['Geometry']['BoundingBox'], img_word)
                 img_word, box=make_boxes(i['DetectedText'], i['Geometry']['BoundingBox'], img_word)            
                 box.insert(0, word)
                 l_words.append(tuple(box))
 
             elif i['Type'] =='LINE':
                 line=i['DetectedText']
-                #box=get_pixelcount(i['Geometry']['BoundingBox'], img_line)
                 img_line, box=make_boxes(i['DetectedText'], i['Geometry']['BoundingBox'], img_line)
                 box.insert(0, line)
                 l_lines.append(tuple(box))
@@ -142,9 +133,7 @@ def show_images (found_text, img, img1, img2, img3):
         cv2.putText(img, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
     
     new_img = cv2.cvtColor(img3.copy(), cv2.COLOR_GRAY2BGR)
-
     img_logger.img_save(LOG_TAG, [img, new_img])
-    #img_logger.img_save(LOG_TAG, [img3])
 
 def different_size_in_line(found_text, user_text, l_lines):
     """Checks for different sizes in the same line and joins the bounding box """
@@ -165,16 +154,9 @@ def different_size_in_line(found_text, user_text, l_lines):
 def find_text(user_text, img )-> list:
     """main function to find text"""
 
-    #photo='Software\PC_App\Testing\screens_vbox_cam\T08_vbox_cam.png'
-    #img = cv2.imread(photo)
     x=img.shape[0]
     y=img.shape[1]
-    #print('size: ' ,img.shape)
-    #plt.imshow(img )
-    #img= cv2.rotate(img, cv2.ROTATE_180)
-    # plt.imshow(img)
     img= crop_screen.StraightenAndCrop_Calibrated(img, x, y)
-    #user_text='Cool'
 
     img1=copy.deepcopy(img)
     img2=copy.deepcopy(img)
@@ -217,6 +199,3 @@ def find_all_words (img)->list:
     l_lines, l_words, img1, img2=get_words_and_mark(response, img1,img2)
 
     return l_words
-
-
-#print(find_text(1,1))

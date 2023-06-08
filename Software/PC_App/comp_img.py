@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
 from crop_screen import StraightenAndCrop, StraightenAndCrop_Calibrated
-#from find_text import find_all_words
 from vbox_logger import logger, img_logger
 import constants as cnst
 import detect_text
@@ -30,12 +29,7 @@ def img_preprocess_IoU_ref(img: cv2.Mat) -> cv2.Mat:
     new_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     new_img = cv2.adaptiveThreshold(new_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                           cv2.THRESH_BINARY_INV, 199, 5)
-    #_, new_img = cv2.threshold(new_img, THRESH, 255, cv2.THRESH_BINARY_INV)
-
-    # Erode
-    kernel = np.ones((1, 1), np.uint8)
-    #new_img = cv2.erode(new_img, kernel, iterations=1)
-    return new_img
+    return
 
 def img_preprocess_IoU_sample(img: cv2.Mat) -> cv2.Mat:
     """ Processes an image to make it ready for IoU comparison """
@@ -100,16 +94,11 @@ def img_getSimilarity(sample_boxes: List[box_t], ref_boxes: List[box_t]) -> floa
     return (len(IoU_matches)/len(ref_boxes))
 
 def CompareText(sample_img: cv2.Mat, ref_img: str) -> float:
-    # Temporarily save sample img while find_text module
-    # is ready to accept images
-    #tmp_sample_path = 'sample_tmp.png'
     sample_img = img_preprocess_Text(sample_img)
-    #cv2.imwrite(tmp_sample_path, sample_img)
 
     # Read all words in both images and delete temporary img after done
     sample_words = [wrd[0] for wrd in detect_text.find_all_words(sample_img)]
     ref_words = [wrd[0] for wrd in detect_text.find_all_words(ref_img)]
-    #os.remove(tmp_sample_path)
 
     # Compare words
     matches = 0

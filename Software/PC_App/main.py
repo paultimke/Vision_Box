@@ -14,7 +14,6 @@ from help import help_cmd, example_cmd
 from vbox_logger import logger
 
 ############################### Global variables ##############################
-debug_flag = False
 cmd_queue = []
 failed_commands = []
 mutex = threading.Lock()
@@ -203,7 +202,7 @@ def is_CLI_args_valid(args):
 # END is_CLI_args_valid()
 
 def inputIMG_init(cam_port: str):
-    """ Read input image """
+    """ Take image capture from camera """
     if cam_port == "0" or cam_port == "1" or cam_port == "2" or cam_port == "3" or cam_port == "4":
         cam = cv2.VideoCapture(int(cam_port), cv2.CAP_DSHOW)
         time.sleep(0.2)
