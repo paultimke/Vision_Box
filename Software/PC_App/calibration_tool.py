@@ -84,7 +84,7 @@ def main():
     _ = input("Press ENTER when device is ready")
 
     # load the image, rotate it to face forwards and clone it
-    vid = cv2.VideoCapture(int(cnst.DEFAULT_CAM_PORT))
+    vid = cv2.VideoCapture(cnst.DEFAULT_CAM_PORT)
     image = capture_frame(vid)
     clone = image.copy()
 
