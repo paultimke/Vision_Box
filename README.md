@@ -28,5 +28,7 @@ Waiting on commands to finish processing...
 Test result: PASSED
 ```
 The images used on the above session were the following:
+<img width="780" alt="images_dut" src="https://github.com/paultimke/Vision_Box/assets/87957114/f629eb5c-71e6-4745-8412-0bf6ae271fb7">
+
 
 
