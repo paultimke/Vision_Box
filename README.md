@@ -32,8 +32,32 @@ The images used on the above session were the following:
 
 After the test, the following output images and log file will be produced:
 <p float="left">
-  <img width="269" alt="ficon_out" src="https://github.com/paultimke/Vision_Box/assets/87957114/e6d5e774-4dc3-4d79-8ff1-3e9260bd5a1f">
-  <img width="267" alt="ftext_out" src="https://github.com/paultimke/Vision_Box/assets/87957114/a02bc02c-8afb-4de5-968c-ecfd6d4b794f">
+  <img width="150" alt="ficon_out" src="https://github.com/paultimke/Vision_Box/assets/87957114/cae11482-e7bf-4f8a-89f9-cc89fcd9d3b0">
+  <img width="153" alt="ftext_out" src="https://github.com/paultimke/Vision_Box/assets/87957114/13115623-219c-4977-9bd8-3c2a840fddca">
 </p>
+
+```
+VISION BOX LOG FILE
+Vision Box software version 0.1.0
+Starting light level: 0
+Verbose Output enabled: True
+
+TIMESTAMP              #  who  DESCRIPTION
+[2023-06-29-00-27-40]  1 [PC]  TESTSTATUS(START)
+[2023-06-29-00-27-43]  2 [PC]  FICON(clock.png)
+[2023-06-29-00-27-54]  3 [VB]  FICON PASSED
+[2023-06-29-00-27-54]  4 [VB]  FICON Number of objects detected: 1
+[2023-06-29-00-27-56]  6 [PC]  COMPIMAGE(test_screen.png)
+[2023-06-29-00-27-56]  7 [VB]  COMPIMAGE Structural similarity: 0.81
+[2023-06-29-00-27-58]  8 [VB]  COMPIMAGE Image text similarity: 0.9
+[2023-06-29-00-27-58]  9 [VB]  COMPIMAGE PASSED
+[2023-06-29-00-28-01]  10 [PC]  FTEXT(network)
+[2023-06-29-00-28-04]  11 [VB]  FTEXT PASSED
+[2023-06-29-00-28-04]  12 [VB]  FTEXT Number of times the text 'network' was found: 1
+[2023-06-29-00-28-06]  14 [PC]  TESTSTATUS(END)
+[2023-06-29-00-28-06]  15 [VB]  
+PASSED
+```
+
 
 
