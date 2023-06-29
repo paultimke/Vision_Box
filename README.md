@@ -35,5 +35,7 @@ After the test, the following output images and log file will be produced:
   <img width="1065" alt="output" src="https://github.com/paultimke/Vision_Box/assets/87957114/90ce9674-7fd8-418f-9542-5292209a889e">
 </p>
 
+## Images of the physical device built
+<img width="697" alt="physical" src="https://github.com/paultimke/Vision_Box/assets/87957114/d343ccb9-ebb9-4fb9-9a4e-f66ef7f0fd38">
 
 
